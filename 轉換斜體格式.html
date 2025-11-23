@@ -5,85 +5,107 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>轉換斜體格式</title>
 
-<!-- Tailwind CSS -->
-<script src="https://cdn.tailwindcss.com"></script>
-
 <style>
-  body { font-family: "Microsoft JhengHei", sans-serif; }
+  body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    margin: 0 auto;
+    background-color: #f9f9f9;
+  }
+
+  /* 桌機最大寬度限制 */
+  @media (min-width: 601px) {
+    body { max-width: 800px; }
+  }
+
+  h2 { text-align: center; color: #333; }
+
+  textarea {
+    width: 100%;
+    height: 200px;
+    margin-bottom: 10px;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+  }
+
+  #output {
+    white-space: pre-wrap;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 5px;
+    background-color: #fff;
+    height: 200px;        /* 固定高度 */
+    overflow-y: auto;     /* 捲軸 */
+  }
+
+  button {
+    padding: 10px 20px;
+    font-size: 16px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  button:hover { opacity: 0.8; }
+
+  #pasteBtn { background-color: #4CAF50; color: white; }
+  #copyBtn { background-color: #2196F3; color: white; }
+  #downloadBtn { background-color: #FF9800; color: white; }
+  .transform-btn { background-color: #777; color: white; } 
+
+  label { font-weight: bold; color: #555; }
+
+  /* 📱 手機：兩欄按鈕 */
+  .button-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+  .button-row button {
+    flex: 0 0 calc(50% - 10px); /* 兩欄 */
+  }
+
+  /* 桌機：按鈕自動寬度 */
+  @media (min-width: 601px) {
+    .button-row button { flex: 0 0 auto; }
+  }
 </style>
 </head>
-<body class="bg-slate-50 p-4 md:p-8">
+<body>
 
-<div class="max-w-3xl mx-auto space-y-6">
+<h2>轉換斜體格式</h2>
 
-  <!-- 標題 -->
-  <h2 class="text-2xl md:text-3xl font-bold text-center text-slate-800">
-    轉換斜體格式工具
-  </h2>
+<label>上傳文字檔 (.txt)：</label>
+<input type="file" id="fileInput" accept=".txt">
+<br><br>
 
-  <!-- 上傳區 -->
-  <div>
-    <label class="font-semibold text-slate-600">上傳文字檔 (.txt)：</label>
-    <input type="file" id="fileInput" accept=".txt"
-      class="mt-1 block w-full text-sm text-slate-600
-             file:mr-4 file:py-2 file:px-4
-             file:rounded-lg file:border-0
-             file:text-sm file:font-semibold
-             file:bg-blue-600 file:text-white
-             hover:file:bg-blue-700
-             cursor-pointer">
-  </div>
+<label>輸入欄位：</label>
+<textarea id="inputText" placeholder="在這裡貼上或輸入文字"></textarea>
 
-  <!-- 輸入欄位 -->
-  <div>
-    <label class="font-semibold text-slate-600">輸入欄位：</label>
-    <textarea id="inputText"
-      class="w-full h-48 p-3 mt-1 rounded-lg border border-slate-300
-             bg-white outline-none focus:ring-2 focus:ring-blue-400
-             resize-none text-base"
-      placeholder="在這裡貼上或輸入文字"></textarea>
-  </div>
+<!-- 兩欄：貼上＋複製 -->
+<div class="button-row" style="margin-top:10px;">
+  <button id="pasteBtn">📋 貼上</button>
+  <button id="copyBtn">✂️ 複製</button>
+</div>
 
-  <!-- 按鈕列 -->
-  <div class="flex flex-col md:flex-row md:justify-center gap-3">
-    <button id="pasteBtn"
-      class="px-4 py-2 rounded-lg bg-green-600 text-white text-base hover:bg-green-700 shadow">
-      📋 貼上
-    </button>
+<h3>轉換結果：</h3>
+<div id="output"></div>
 
-    <button id="copyBtn"
-      class="px-4 py-2 rounded-lg bg-blue-600 text-white text-base hover:bg-blue-700 shadow">
-      ✂️ 複製
-    </button>
-  </div>
-
-  <!-- 結果 -->
-  <div>
-    <h3 class="text-lg font-semibold text-slate-700 mb-1">轉換結果：</h3>
-    <div id="output"
-      class="min-h-48 w-full p-3 whitespace-pre-wrap bg-white rounded-lg border border-slate-300 text-base">
-    </div>
-  </div>
-
-  <!-- 轉換 & 下載 -->
-  <div class="flex flex-col md:flex-row md:justify-center gap-3 mt-4">
-    <button onclick="runTransform()"
-      class="px-4 py-2 rounded-lg bg-purple-600 text-white text-base hover:bg-purple-700 shadow">
-      轉換
-    </button>
-
-    <button id="downloadBtn"
-      class="px-4 py-2 rounded-lg bg-orange-500 text-white text-base hover:bg-orange-600 shadow">
-      ⬇️ 下載 (.txt)
-    </button>
-  </div>
-
+<!-- 兩欄：轉換＋下載 -->
+<div class="button-row" style="margin-top:10px;">
+  <button class="transform-btn" onclick="runTransform()">轉換</button>
+  <button id="downloadBtn">⬇️ 下載 (.txt)</button>
 </div>
 
 <script>
 let latestOutput = "";
 
-// 巨集（完全保留你的邏輯）
 function transformText(text) {
   text = text.replace(/(^|\n)/g, "$1@#%");
   text = text.replace(/(\n|$)/g, "@#%$1");
@@ -104,7 +126,6 @@ function runTransform() {
   latestOutput = output;
 }
 
-// 下載結果
 function downloadText() {
   if (!latestOutput) return alert("請先輸入或貼上文字！");
   const blob = new Blob([latestOutput], { type: "text/plain;charset=utf-8" });
@@ -118,50 +139,43 @@ function downloadText() {
   URL.revokeObjectURL(url);
 }
 
-// 元素
 const inputArea = document.getElementById("inputText");
 const outputArea = document.getElementById("output");
 
-// 一鍵貼上
 document.getElementById("pasteBtn").addEventListener("click", async () => {
   try {
     const text = await navigator.clipboard.readText();
     inputArea.value = text;
     runTransform();
   } catch {
-    alert("⚠️ 無法讀取剪貼簿，請確認已授權");
+    alert("⚠️ 無法讀取剪貼簿內容，請確認已授權");
   }
 });
 
-// 一鍵複製
 document.getElementById("copyBtn").addEventListener("click", async () => {
   try {
     await navigator.clipboard.writeText(outputArea.innerText);
     const btn = document.getElementById("copyBtn");
-    const old = btn.innerText;
     btn.innerText = "已複製！";
-    setTimeout(() => btn.innerText = old, 1200);
+    setTimeout(() => btn.innerText = "✂️ 複製", 1200);
   } catch {
     alert("⚠️ 複製失敗，請手動選取");
   }
 });
 
-// 下載
 document.getElementById("downloadBtn").addEventListener("click", downloadText);
 
-// 檔案上傳
-document.getElementById("fileInput").addEventListener('change', (event) => {
+document.getElementById('fileInput').addEventListener('change', event => {
   const file = event.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = (e) => {
+  reader.onload = e => {
     inputArea.value = e.target.result;
     runTransform();
   };
   reader.readAsText(file, "UTF-8");
 });
 
-// 即時轉換
 inputArea.addEventListener("input", runTransform);
 </script>
 
