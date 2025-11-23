@@ -61,21 +61,27 @@
 
   label { font-weight: bold; color: #555; }
 
-  /* 📱 手機：兩欄按鈕 */
   .button-row {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-  }
-  .button-row button {
-    flex: 0 0 calc(50% - 10px); /* 兩欄 */
-  }
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
 
-  /* 桌機：按鈕自動寬度 */
-  @media (min-width: 601px) {
-    .button-row button { flex: 0 0 auto; }
+/* 手機：兩欄 */
+@media (max-width: 600px) {
+  .button-row button {
+    flex: 0 0 calc(50% - 10px); /* 一列兩個 */
   }
+}
+
+/* 桌機：原本大小 */
+@media (min-width: 600px) {
+  .button-row button {
+    flex: 0 0 auto;
+  }
+}
+
 </style>
 </head>
 <body>
