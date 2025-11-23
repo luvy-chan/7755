@@ -71,7 +71,8 @@
 /* 手機：兩欄 */
 @media (max-width: 599px) {
   .button-row button {
-    flex: 0 0 calc(50% - 10px); /* 一列兩個 */
+    flex: 1 1 calc(50% - 10px); /* 自動縮小，保持兩欄 */
+    min-width: 0;               /* 防止長文字撐開 */
   }
 }
 
@@ -97,7 +98,7 @@
 
 <!-- 兩欄：貼上＋複製 -->
 <div class="button-row" style="margin-top:10px;">
-  <button id="pasteBtn">📋 貼貼上</button>
+  <button id="pasteBtn">📋 貼上</button>
   <button id="copyBtn">✂️ 複製</button>
 </div>
 
