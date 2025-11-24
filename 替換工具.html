@@ -45,7 +45,7 @@
     flex: 1;
     padding: 5px;
     font-family: monospace;
-    height: 60px;
+    height: 20px;
   }
   .removeRule {
     background-color: #f44336;
@@ -86,16 +86,20 @@
 <body>
 
 <h1>批量替換工具</h1>
-
 <label>輸入程式碼：</label>
-<button id="pasteBtn">📋 從剪貼簿貼上</button>
+
 <textarea id="input" placeholder="在此輸入程式碼..."></textarea>
 
 <h3>替換規則（左欄: 被替換文字，右欄: 替換成文字）</h3>
 <div id="rulesContainer"></div>
 
-<button id="addRule">新增規則</button>
-<button id="copyBtn">複製結果</button>
+<!-- 按鈕區 -->
+<div id="buttonRow" style="display:flex; justify-content: center; align-items: center; gap:10px; margin-bottom:10px;">
+  <button id="pasteBtn">📋 貼上</button>
+  <button id="copyBtn">✂️ 複製</button>
+  <button id="addRule" style="margin-left:auto;">➕ 新增</button>
+</div>
+
 
 <h3>替換後結果</h3>
 <div id="output"></div>
