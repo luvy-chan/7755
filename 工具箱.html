@@ -3,161 +3,96 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>拉比的工具箱 - 本地版</title>
+<title>TXT 轉聊天頁面</title>
 <style>
-  body { font-family: 'Noto Sans TC', Arial, sans-serif; background:#f9f9f9; color:#333; margin:0; padding:20px;}
-  .container { max-width: 1000px; margin: auto; }
-  h1, h2 { margin:0 0 10px 0; }
-  .card { background:white; padding:20px; border-radius:10px; margin-bottom:20px; box-shadow:0 2px 8px rgba(0,0,0,0.1);}
-  .file-drop { border:2px dashed #ccc; padding:20px; text-align:center; cursor:pointer; }
-  .file-drop:hover { border-color:#007bff; }
-  input[type="file"] { display:none; }
-  .avatar { width:50px; height:50px; border-radius:50%; border:1px solid #ccc; background-size:cover; background-position:center; display:inline-block; }
-  .chat-preview { border:1px solid #ccc; border-radius:10px; max-height:500px; overflow:auto; padding:10px; background:#fefefe;}
-  .char { display:flex; align-items:flex-start; margin-bottom:10px; }
-  .pc { display:flex; flex-direction:row-reverse; align-items:flex-start; margin-bottom:10px; }
-  .msg-container { max-width:280px; margin:0 10px; }
-  .msg-content { background:#fff; padding:8px 12px; border-radius:4px 16px 16px 16px; }
-  .pc .msg-content { background:#f9cedc; border-radius:16px 16px 4px 16px; }
-  .character-name { font-size:14px; color:#888; margin-bottom:4px; }
+body { font-family:'Noto Sans TC', sans-serif; background:#FFF5F8; margin:0; padding:0; color:#333; }
+.chat-container { max-width:600px; margin:0 auto; padding:20px; }
+.date-divider { text-align:center; color:#888; margin:10px 0; font-size:12px; }
+.char, .pc { display:flex; margin-bottom:15px; align-items:flex-start; }
+.avatar { width:40px; height:40px; border-radius:50%; flex-shrink:0; background-size:cover; background-position:center; margin-right:10px; }
+.ava-char { background-color:#E0E0E0; }
+.ava-pc { background-color:#F9CEDC; }
+.msg-container { max-width:70%; display:flex; flex-direction:column; }
+.character-name { font-size:14px; color:#888; margin-bottom:4px; }
+.msg-content { background:#fff; padding:8px 12px; border-radius:4px 16px 16px 16px; font-size:15px; }
+.msg-timestamp { font-size:12px; color:#888; margin-top:4px; align-self:flex-end; }
+.pc .msg-content { background:#F9CEDC; border-radius:16px 16px 4px 16px; }
 </style>
 </head>
 <body>
-<div class="container">
-  <h1>拉比的工具箱（本地版）</h1>
 
-  <div class="card">
-    <h2>上傳文字檔案</h2>
-    <div class="file-drop" id="fileDrop">點擊選取 .txt 文件</div>
-    <input type="file" id="fileInput" accept=".txt">
-  </div>
-
-  <div class="card">
-    <h2>選擇聊天室主題</h2>
-    <select id="themeSelect">
-      <option value="basic" selected>基礎</option>
-      <option value="black">黑色</option>
-      <option value="brown">棕色</option>
-      <option value="green">綠色</option>
-    </select>
-  </div>
-
-  <div class="card">
-    <h2>選擇頭像</h2>
-    <div>
-      <label>角色 頭像</label>
-      <div class="avatar" id="charAvatar"></div>
-      <button onclick="document.getElementById('charFile').click()">上傳圖片</button>
-      <input type="file" id="charFile" accept="image/*">
-    </div>
-    <div style="margin-top:10px;">
-      <label>玩家 頭像</label>
-      <div class="avatar" id="pcAvatar"></div>
-      <button onclick="document.getElementById('pcFile').click()">上傳圖片</button>
-      <input type="file" id="pcFile" accept="image/*">
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>調整訊息寬度</h2>
-    <input type="range" id="msgWidth" min="280" max="400" value="280">
-  </div>
-
-  <div class="card">
-    <h2>預覽</h2>
-    <div class="chat-preview" id="chatPreview">
-      <!-- 預覽訊息會出現在這裡 -->
-    </div>
-  </div>
-
-  <div class="card">
-    <button id="downloadBtn">下載 HTML 文件</button>
-  </div>
-</div>
+<input type="file" id="fileInput" accept=".txt">
+<div class="chat-container" id="chatContainer"></div>
 
 <script>
-const fileDrop = document.getElementById('fileDrop');
-const fileInput = document.getElementById('fileInput');
-const chatPreview = document.getElementById('chatPreview');
-const themeSelect = document.getElementById('themeSelect');
-const msgWidth = document.getElementById('msgWidth');
-const charAvatar = document.getElementById('charAvatar');
-const pcAvatar = document.getElementById('pcAvatar');
-const charFile = document.getElementById('charFile');
-const pcFile = document.getElementById('pcFile');
-const downloadBtn = document.getElementById('downloadBtn');
-
-fileDrop.addEventListener('click', ()=>fileInput.click());
-fileInput.addEventListener('change', handleFile);
-
-function handleFile() {
-  const file = fileInput.files[0];
-  if (!file) return;
+const chatContainer = document.getElementById('chatContainer');
+document.getElementById('fileInput').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  if(!file) return;
   const reader = new FileReader();
-  reader.onload = e => renderChat(e.target.result);
+  reader.onload = function(evt){
+    const text = evt.target.result;
+    parseAndRender(text);
+  };
   reader.readAsText(file, 'UTF-8');
-}
+});
 
-function renderChat(text) {
-  const lines = text.split('\n');
-  chatPreview.innerHTML = '';
-  lines.forEach(line=>{
-    const div = document.createElement('div');
-    div.className = 'char';
-    div.innerHTML = `
-      <div class="avatar" style="background-image:url('${charAvatar.style.backgroundImage.slice(5,-2)}')"></div>
-      <div class="msg-container">
-        <div class="character-name">角色</div>
-        <div class="msg-content">${line}</div>
-      </div>
-    `;
-    chatPreview.appendChild(div);
+// 範例 TXT 格式:
+// [2025-05-23]
+// 米羅: 你好，地球人。
+// PC: 警告，請退後。
+function parseAndRender(text){
+  chatContainer.innerHTML = '';
+  const lines = text.split(/\r?\n/);
+  let currentDate = '';
+  lines.forEach(line => {
+    line = line.trim();
+    if(!line) return;
+    const dateMatch = line.match(/^\[(\d{4}-\d{2}-\d{2})\]$/);
+    if(dateMatch){
+      currentDate = dateMatch[1];
+      const div = document.createElement('div');
+      div.className = 'date-divider';
+      div.textContent = currentDate;
+      chatContainer.appendChild(div);
+    } else {
+      const parts = line.split(':');
+      if(parts.length < 2) return;
+      const role = parts[0].trim();
+      const msg = parts.slice(1).join(':').trim();
+
+      const wrapper = document.createElement('div');
+      wrapper.className = role.toLowerCase() === 'pc' ? 'pc' : 'char';
+
+      const avatar = document.createElement('div');
+      avatar.className = 'avatar ' + (role.toLowerCase() === 'pc' ? 'ava-pc' : 'ava-char');
+      wrapper.appendChild(avatar);
+
+      const msgContainer = document.createElement('div');
+      msgContainer.className = 'msg-container';
+      if(role.toLowerCase() !== 'pc'){
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'character-name';
+        nameDiv.textContent = role;
+        msgContainer.appendChild(nameDiv);
+      }
+
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'msg-content';
+      contentDiv.innerHTML = msg.replace(/\*\*(.+?)\*\*/g, '<em>$1</em>'); // 支援 **斜體**
+      msgContainer.appendChild(contentDiv);
+
+      const timeDiv = document.createElement('div');
+      timeDiv.className = 'msg-timestamp';
+      timeDiv.textContent = '00:00';
+      msgContainer.appendChild(timeDiv);
+
+      wrapper.appendChild(msgContainer);
+      chatContainer.appendChild(wrapper);
+    }
   });
-  updateMsgWidth();
 }
-
-themeSelect.addEventListener('change', ()=>{
-  chatPreview.style.background = themeSelect.value==='black'? '#222':
-                                themeSelect.value==='brown'? '#f4ebe0':
-                                themeSelect.value==='green'? '#e6f4ea': '#fefefe';
-});
-
-msgWidth.addEventListener('input', updateMsgWidth);
-function updateMsgWidth(){
-  const w = msgWidth.value+'px';
-  chatPreview.querySelectorAll('.msg-container').forEach(mc=>{
-    mc.style.maxWidth = w;
-  });
-}
-
-charFile.addEventListener('change', e=>{
-  const reader = new FileReader();
-  reader.onload = ev=> charAvatar.style.backgroundImage = `url('${ev.target.result}')`;
-  reader.readAsDataURL(e.target.files[0]);
-});
-pcFile.addEventListener('change', e=>{
-  const reader = new FileReader();
-  reader.onload = ev=> pcAvatar.style.backgroundImage = `url('${ev.target.result}')`;
-  reader.readAsDataURL(e.target.files[0]);
-});
-
-downloadBtn.addEventListener('click', ()=>{
-  const htmlContent = `
-  <html><head><meta charset="UTF-8"><title>聊天記錄</title>
-  <style>
-  body{font-family:'Noto Sans TC',Arial,sans-serif;padding:20px;}
-  .char{display:flex;margin-bottom:10px;align-items:flex-start;}
-  .avatar{width:50px;height:50px;border-radius:50%;background-size:cover;margin-right:10px;}
-  .msg-container{max-width:${msgWidth.value}px;}
-  .msg-content{background:#fff;padding:8px 12px;border-radius:4px 16px 16px 16px;}
-  </style>
-  </head><body>${chatPreview.innerHTML}</body></html>`;
-  const blob = new Blob([htmlContent],{type:'text/html'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'chat.html';
-  a.click();
-});
 </script>
+
 </body>
 </html>
