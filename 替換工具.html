@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>批量替換工具</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background-color: #f9f9f9;
+  }
+  h1 { text-align: center; }
+  textarea {
+    width: 100%;
+    height: 150px;
+    margin-bottom: 10px;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 14px;
+  }
+  #output {
+    width: 100%;
+    height: 150px;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 14px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    white-space: pre-wrap;
+  }
+  button {
+    padding: 8px 12px;
+    margin-top: 5px;
+    cursor: pointer;
+  }
+  label {
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+
+<h1>批量程式碼替換工具</h1>
+
+<label>輸入程式碼：</label>
+<textarea id="input" placeholder="在此輸入程式碼..."></textarea>
+
+<label>批量替換規則 (格式：舊文字 → 新文字，一行一個規則)：</label>
+<textarea id="rules" placeholder="例如：&#10;foo → bar&#10;hello → hi"></textarea>
+
+<button id="copyBtn">複製結果</button>
+
+<h3>替換後結果</h3>
+<div id="output"></div>
+
+<script>
+const input = document.getElementById('input');
+const output = document.getElementById('output');
+const rulesTextarea = document.getElementById('rules');
+
+function applyRules(text) {
+  const rulesText = rulesTextarea.value;
+  const lines = rulesText.split(/\r?\n/);
+
+  lines.forEach(line => {
+    const parts = line.split('→');
+    if(parts.length === 2) {
+      const findText = parts[0].trim();
+      const replaceText = parts[1].trim();
+      if(findText) {
+        const regex = new RegExp(findText, 'g'); // 全部替換
+        text = text.replace(regex, replaceText);
+      }
+    }
+  });
+
+  return text;
+}
+
+function updateOutput() {
+  output.textContent = applyRules(input.value);
+}
+
+input.addEventListener('input', updateOutput);
+rulesTextarea.addEventListener('input', updateOutput);
+
+document.getElementById('copyBtn').addEventListener('click', () => {
+  navigator.clipboard.writeText(output.textContent).then(() => {
+    alert('已複製到剪貼簿！');
+  });
+});
+</script>
+
+</body>
+</html>
