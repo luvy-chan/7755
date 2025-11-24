@@ -41,12 +41,29 @@
     display: flex;
     gap: 10px;
     margin-bottom: 5px;
+    align-items: flex-start;
   }
   .rule-row textarea {
     flex: 1;
     padding: 5px;
     font-family: monospace;
     height: 60px;
+  }
+  .removeRule {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    width: 25px;
+    height: 25px;
+    padding: 0;
+    font-weight: bold;
+    line-height: 25px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 3px;
+  }
+  .removeRule:hover {
+    background-color: #d32f2f;
   }
 </style>
 </head>
@@ -62,6 +79,7 @@
   <div class="rule-row">
     <textarea class="find" placeholder="被替換文字"></textarea>
     <textarea class="replace" placeholder="替換成文字"></textarea>
+    <button class="removeRule">−</button>
   </div>
 </div>
 <button id="addRule">新增規則</button>
@@ -82,8 +100,7 @@ function applyRules(text) {
     const findText = row.querySelector('.find').value;
     const replaceText = row.querySelector('.replace').value;
     if(findText) {
-      // 使用 gs 標誌支援跨行替換
-      const regex = new RegExp(findText, 'gs');
+      const regex = new RegExp(findText, 'gs'); // 支援跨行替換
       text = text.replace(regex, replaceText);
     }
   });
@@ -112,8 +129,17 @@ document.getElementById('addRule').addEventListener('click', () => {
   row.innerHTML = `
     <textarea class="find" placeholder="被替換文字"></textarea>
     <textarea class="replace" placeholder="替換成文字"></textarea>
+    <button class="removeRule">−</button>
   `;
   rulesContainer.appendChild(row);
+});
+
+// 刪除規則按鈕
+rulesContainer.addEventListener('click', (e) => {
+  if(e.target.classList.contains('removeRule')) {
+    e.target.parentElement.remove();
+    updateOutput();
+  }
 });
 </script>
 
