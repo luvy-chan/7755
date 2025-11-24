@@ -3,79 +3,122 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>拉比的工具箱 - 單機版</title>
+<title>單機 TXT → HTML 轉換工具</title>
 <style>
-  body { font-family: 'Noto Sans TC', Arial, sans-serif; margin: 0; padding: 20px; background: #f9f9f9; color: #333; }
-  h1 { text-align:center; margin-bottom:20px; }
-  .container { display:flex; gap:20px; }
-  .panel { background:white; padding:20px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.1); flex:1; }
-  .panel input[type="file"] { display:block; margin-bottom:10px; }
-  .chat-preview { max-height:600px; overflow:auto; border:1px solid #ccc; padding:10px; background:#fff; border-radius:6px; }
-  .char, .pc { display:flex; align-items:flex-start; margin-bottom:15px; }
-  .pc { flex-direction:row-reverse; }
-  .avatar { width:40px; height:40px; border-radius:50%; background-size:cover; margin:0 10px; }
-  .msg-container { max-width:280px; display:flex; flex-direction:column; }
-  .msg-content { padding:8px 12px; border-radius:16px 16px 16px 4px; background:#f0f0f0; margin-bottom:4px; }
-  .pc .msg-content { background:#f9cedc; border-radius:16px 16px 4px 16px; }
-  .character-name { font-size:14px; color:#888; margin-bottom:4px; }
-  .msg-timestamp { font-size:12px; color:#888; align-self:flex-end; }
+body { font-family: Arial, sans-serif; background:#f9f9f9; margin:0; padding:20px; color:#333; }
+.container { max-width: 1000px; margin:0 auto; display:flex; gap:20px; }
+.sidebar { width:300px; display:flex; flex-direction:column; gap:10px; }
+.main { flex:1; display:flex; flex-direction:column; }
+textarea { width:100%; height:300px; padding:10px; font-family:monospace; }
+button { padding:10px; cursor:pointer; background:#007BFF; color:white; border:none; border-radius:5px; }
+.preview { flex:1; overflow:auto; border:1px solid #ccc; padding:10px; background:white; height:600px; }
+.chat-container { max-width:500px; margin:0 auto; }
+.date-divider{ font-size:12px;color:#888;text-align:center;margin:10px 0; }
+.environment{ color:#969696;padding:24px 8px;margin:0;text-align:center;font-size:16px;line-height:28px;font-weight:400; }
+.char, .pc{ display:flex; align-items:flex-start; margin-bottom:15px; }
+.pc{ flex-direction:row-reverse; align-items:flex-end; }
+.avatar{ width:40px; height:40px; border-radius:50%; overflow:hidden; flex-shrink:0; background-size:cover; background-position:center; background-repeat:no-repeat; }
+.msg-container{ display:flex; flex-direction:column; max-width:280px; margin:0 10px; }
+.character-name{ font-size:14px; margin-bottom:4px; color:#888; }
+.msg-content{ background:#fff; color:#333; padding:8px 12px; border-radius:4px 16px 16px 16px; font-size:15px; font-weight:400; white-space:pre-wrap; }
+.pc .msg-content{ background:#F9CEDC; border-radius:16px 16px 4px 16px; }
+.msg-timestamp{ font-size:12px;color:#888;margin-top:4px; align-self:flex-end; }
 </style>
 </head>
 <body>
-
-<h1>拉比的工具箱 - 單機版</h1>
+<h1>單機 TXT → HTML 轉換工具</h1>
 <div class="container">
-  <div class="panel">
-    <h2>上傳 TXT 文件</h2>
-    <input type="file" id="txtFile" accept=".txt">
-    <button id="convertBtn">轉換為 HTML</button>
+  <div class="sidebar">
+    <input type="file" id="fileInput" accept=".txt"/>
+    <button onclick="convert()">轉換為 HTML</button>
+    <button onclick="downloadHTML()">下載 HTML</button>
   </div>
-  <div class="panel">
-    <h2>預覽</h2>
-    <div class="chat-preview" id="preview"></div>
+  <div class="main">
+    <textarea id="txtContent" placeholder="或在此貼上 TXT 內容"></textarea>
+    <div class="preview" id="preview"></div>
   </div>
 </div>
 
 <script>
-function escapeHTML(str){
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function parseTXT(txt) {
+  const lines = txt.split(/\r?\n/);
+  const chatHTML = [];
+  let currentDate = '';
+  for(let i=0;i<lines.length;i++){
+    let line = lines[i].trim();
+    if(line.startsWith('[') && line.includes('Environment')){
+      // 系統描述
+      let content = line.replace(/\[.*?\] Environment.*?:\s*/,'');
+      chatHTML.push(`<div class="environment">${content}</div>`);
+    } else if(line.startsWith('[') && line.match(/\]:/)){
+      // 玩家對話
+      let match = line.match(/\[(.*?)\]\s*(.*?):\s*(.*)/);
+      if(match){
+        let time = match[1];
+        let name = match[2];
+        let content = match[3];
+        let isPC = name.toLowerCase().includes('user') || name==='♤';
+        chatHTML.push(`<div class="${isPC?'pc':'char'}">
+          <div class="avatar" style="background-image:url('${isPC?'https://via.placeholder.com/40/FFC0CB':'https://via.placeholder.com/40/AAA'}')"></div>
+          <div class="msg-container">
+            ${!isPC?`<div class="character-name">${name}</div>`:''}
+            <div class="msg-content">${content}</div>
+          </div>
+          <div class="msg-timestamp">${time.split(' ')[1]}</div>
+        </div>`);
+      }
+    } else if(line.startsWith('*') && line.endsWith('*')){
+      // 描述文字
+      let content = line.replace(/\*/g,'');
+      chatHTML.push(`<div class="environment"><em>${content}</em></div>`);
+    } else if(line==='') continue;
+    else{
+      // 普通文字也當作環境
+      chatHTML.push(`<div class="environment">${line}</div>`);
+    }
+  }
+  return `<div class="chat-container">${chatHTML.join('')}</div>`;
 }
 
-document.getElementById('convertBtn').addEventListener('click', ()=>{
-  const fileInput = document.getElementById('txtFile');
-  if(!fileInput.files.length) return alert('請選擇 TXT 檔案');
-  
-  const file = fileInput.files[0];
-  const reader = new FileReader();
-  reader.onload = e=>{
-    const txt = e.target.result;
-    const chatHTML = txt.split(/\r?\n/).map(line=>{
-      line = escapeHTML(line.trim());
-      if(!line) return '';
-      // 簡單判斷角色訊息
-      let match = line.match(/^\[(.*?)\]\s*(.*?):\s*(.*)$/);
-      if(match){
-        const [_, timestamp, character, message] = match;
-        const isPC = character === '♤' || character.toLowerCase() === 'player';
-        return `
-        <div class="${isPC ? 'pc' : 'char'}">
-          <div class="avatar" style="background-image:url('');"></div>
-          <div class="msg-container">
-            <div class="character-name">${character}</div>
-            <div class="msg-content">${message.replace(/\*(.*?)\*/g,'<em>$1</em>').replace(/\n/g,'<br>')}</div>
-          </div>
-          <div class="msg-timestamp">${timestamp.split(' ')[1]}</div>
-        </div>`;
-      }
-      // 系統訊息
-      return `<div class="msg-content">${line}</div>`;
-    }).join('');
-    
-    document.getElementById('preview').innerHTML = chatHTML;
-  };
-  reader.readAsText(file, 'UTF-8');
-});
-</script>
+function convert(){
+  const txt = document.getElementById('txtContent').value;
+  const html = parseTXT(txt);
+  document.getElementById('preview').innerHTML = html;
+}
 
+document.getElementById('fileInput').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  if(file){
+    const reader = new FileReader();
+    reader.onload = function(ev){
+      document.getElementById('txtContent').value = ev.target.result;
+    };
+    reader.readAsText(file, 'UTF-8');
+  }
+});
+
+function downloadHTML(){
+  const htmlContent = `
+  <!DOCTYPE html>
+  <html lang="zh-TW">
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>轉換後的聊天紀錄</title>
+  <style>
+  ${document.querySelector('style').innerHTML}
+  </style>
+  </head>
+  <body>
+  ${document.getElementById('preview').innerHTML}
+  </body>
+  </html>`;
+  const blob = new Blob([htmlContent], {type: 'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'chat.html';
+  a.click();
+}
+</script>
 </body>
 </html>
