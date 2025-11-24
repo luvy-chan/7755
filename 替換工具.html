@@ -103,7 +103,8 @@ function applyRules(text) {
     const findText = row.querySelector('.find').value;
     const replaceText = row.querySelector('.replace').value;
     if(findText) {
-      const regex = new RegExp(findText, 'gs'); // 支援跨行替換
+      const escaped = findText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(escaped, 'gs'); // 支援跨行替換
       text = text.replace(regex, replaceText);
     }
   });
