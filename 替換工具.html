@@ -94,18 +94,22 @@
 <div id="rulesContainer"></div>
 
 <!-- 按鈕區 -->
-<div id="buttonRow" style="position: relative; height: 40px; margin-bottom:10px;">
-  <!-- 右側新增按鈕 -->
-  <div style="position: absolute; right: 0;">
-    <button id="addRule">➕ 新增</button>
-  </div>
+<div id="buttonRow" style="display:flex; align-items:center; margin-bottom:10px;">
+  <!-- 左側空白占位 -->
+  <div style="flex:1;"></div>
 
   <!-- 中間貼上/複製按鈕 -->
-  <div style="text-align: center;">
+  <div style="display:flex; gap:10px; justify-content:center; flex:1;">
     <button id="pasteBtn">📋 貼上</button>
     <button id="copyBtn">✂️ 複製</button>
   </div>
+
+  <!-- 右側新增按鈕 -->
+  <div style="flex:1; display:flex; justify-content:flex-end;">
+    <button id="addRule">➕ 新增</button>
+  </div>
 </div>
+
 
 <h3>替換後結果</h3>
 <div id="output"></div>
