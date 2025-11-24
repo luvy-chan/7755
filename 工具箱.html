@@ -3,122 +3,119 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>單機版拉比工具箱</title>
+<title>拉比的工具箱 - 單機版</title>
 <style>
-  body { font-family: 'Noto Sans TC', sans-serif; background:#f9f9f9; padding:20px; }
-  .container { max-width:900px; margin:auto; }
+  body { font-family: Arial, sans-serif; background:#f9f9f9; margin:0; padding:20px; }
+  .container { max-width:900px; margin:0 auto; }
   h1 { text-align:center; }
-  .section { background:white; padding:15px; margin-bottom:20px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.1);}
-  .preview { border:1px solid #ccc; height:400px; overflow:auto; padding:10px; background:#fff;}
-  .download-btn { background:#3b82f6;color:white;padding:10px 15px;border:none;border-radius:5px;cursor:pointer;}
-  .char, .pc { display:flex; margin-bottom:15px; }
-  .char .avatar, .pc .avatar { width:40px; height:40px; border-radius:50%; background:#aaa; flex-shrink:0; }
-  .char .msg-container, .pc .msg-container { margin-left:10px; max-width:280px; }
-  .pc { flex-direction: row-reverse; }
-  .pc .msg-container { margin-right:10px; margin-left:0; }
-  .msg-content { background:#f1f1f1; padding:8px 12px; border-radius:10px; white-space:pre-wrap; }
-  .pc .msg-content { background:#f9cedc; }
-  .character-name { font-size:14px; color:#666; margin-bottom:3px; }
-  .date-divider { text-align:center; color:#888; font-size:12px; margin:10px 0; }
-  .environment { text-align:center; color:#969696; margin:10px 0; font-size:14px; }
+  input[type=file] { display:block; margin:10px 0; }
+  select, input[type=range], button { margin:5px 0; padding:5px; }
+  iframe { width:100%; height:600px; border:1px solid #ccc; margin-top:10px; }
 </style>
 </head>
 <body>
 <div class="container">
-<h1>單機版拉比工具箱</h1>
-
-<div class="section">
-  <h2>上傳 TXT 文件</h2>
-  <input type="file" id="fileInput" accept=".txt">
-</div>
-
-<div class="section">
-  <h2>預覽</h2>
-  <div class="preview" id="preview"></div>
-</div>
-
-<div class="section">
-  <button class="download-btn" id="downloadBtn">下載 HTML 文件</button>
-</div>
+  <h1>拉比的工具箱 - 單機版</h1>
+  <input type="file" id="txtFile" accept=".txt">
+  <label>選擇訊息寬度：
+    <input type="range" id="msgWidth" min="280" max="400" value="280"> <span id="widthLabel">280</span> px
+  </label>
+  <button id="convertBtn">轉換為 HTML</button>
+  <button id="downloadBtn">下載 HTML</button>
+  <iframe id="preview"></iframe>
 </div>
 
 <script>
-function escapeHTML(str){
+const txtFileInput = document.getElementById('txtFile');
+const msgWidthInput = document.getElementById('msgWidth');
+const widthLabel = document.getElementById('widthLabel');
+const convertBtn = document.getElementById('convertBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+const preview = document.getElementById('preview');
+
+let txtContent = '';
+
+msgWidthInput.addEventListener('input', ()=> {
+  widthLabel.textContent = msgWidthInput.value;
+});
+
+txtFileInput.addEventListener('change', e=>{
+  const file = e.target.files[0];
+  if(file){
+    const reader = new FileReader();
+    reader.onload = function(ev){ txtContent = ev.target.result; };
+    reader.readAsText(file, 'UTF-8');
+  }
+});
+
+function escapeHtml(str){
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-function parseTXT(txt){
+function parseTXTtoHTML(txt){
   const lines = txt.split(/\r?\n/);
   let html = '';
-  let currentDate = '';
-  lines.forEach(line=>{
-    let dateMatch = line.match(/^\[([\d\-\:\s]+)\] Environment/);
-    if(dateMatch){
-      currentDate = dateMatch[1].split(' ')[0];
-      html += `<div class="date-divider">${currentDate}</div>`;
-      html += `<div class="environment">${escapeHTML(line.replace(/^\[.*?\] Environment \(system\):\s*/,''))}</div>`;
-    } else if(line.match(/^\[([\d\-\:\s]+)\] (.*?):/)){
-      let m = line.match(/^\[([\d\-\:\s]+)\] (.*?):\s*(.*)/);
-      let time = m[1].split(' ')[1];
-      let name = m[2];
-      let msg = m[3];
-      html += `<div class="char"><div class="avatar"></div><div class="msg-container"><div class="character-name">${escapeHTML(name)}</div><div class="msg-content">${escapeHTML(msg)}</div></div><div class="msg-timestamp">${time}</div></div>`;
-    } else if(line.trim()==='') {
-      html += '<br>';
-    } else {
-      html += `<div class="char"><div class="avatar"></div><div class="msg-container"><div class="msg-content">${escapeHTML(line)}</div></div></div>`;
+  let dateDivider = '';
+  let envBlock = '';
+  
+  for(let line of lines){
+    line = line.trim();
+    if(line.startsWith('[') && line.includes('Environment')){
+      envBlock += `<div class="environment">${escapeHtml(line.split(':')[1].trim())}</div>\n`;
+    } else if(line.startsWith('[') && line.includes(']')) {
+      // 角色訊息
+      const match = line.match(/\[([^\]]+)\]\s*(.*?):\s*(.*)/);
+      if(match){
+        const time = match[1].split(' ')[1];
+        const char = match[2];
+        const msg = match[3];
+        html += `<div class="char"><div class="avatar ava-char"></div><div class="msg-container"><div class="character-name">${escapeHtml(char)}</div><div class="msg-content">${escapeHtml(msg)}</div></div><div class="msg-timestamp">${time}</div></div>\n`;
+      }
+    } else if(line && !line.startsWith('=') && !line.startsWith('*')){
+      // 一般文字或敘述
+      html += `<div class="environment">${escapeHtml(line)}</div>\n`;
     }
-  });
-  return html;
+  }
+  
+  return `
+  <html>
+  <head>
+    <meta charset="UTF-8">
+    <style>
+      body{ font-family:'Noto Sans TC',Arial,sans-serif; line-height:1.6; margin:0; padding:10px; }
+      .chat-container{ max-width:600px; margin:0 auto; }
+      .char{ display:flex; align-items:flex-start; margin-bottom:15px; }
+      .avatar{ width:40px; height:40px; border-radius:50%; background:#ccc; flex-shrink:0; }
+      .msg-container{ display:flex; flex-direction:column; max-width:${msgWidthInput.value}px; margin:0 10px; }
+      .character-name{ font-size:14px; color:#888; margin-bottom:4px; }
+      .msg-content{ background:#fff; padding:8px 12px; border-radius:4px 16px 16px 16px; }
+      .environment{ color:#555; padding:5px; margin:5px 0; }
+      .msg-timestamp{ font-size:12px; color:#888; margin-top:4px; align-self:flex-end; }
+    </style>
+  </head>
+  <body>
+    <div class="chat-container">
+      ${html}
+    </div>
+  </body>
+  </html>
+  `;
 }
 
-document.getElementById('fileInput').addEventListener('change', e=>{
-  const file = e.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = function(evt){
-    const txt = evt.target.result;
-    const html = parseTXT(txt);
-    document.getElementById('preview').innerHTML = html;
-  };
-  reader.readAsText(file, 'UTF-8');
+convertBtn.addEventListener('click', ()=>{
+  if(!txtContent) { alert('請先選擇 TXT 文件'); return; }
+  const htmlStr = parseTXTtoHTML(txtContent);
+  preview.srcdoc = htmlStr;
 });
 
-document.getElementById('downloadBtn').addEventListener('click', ()=>{
-  const content = document.getElementById('preview').innerHTML;
-  const fullHTML = `<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>聊天紀錄</title>
-<style>
-body { font-family: 'Noto Sans TC', sans-serif; background:#f9f9f9; padding:20px; }
-.char, .pc { display:flex; margin-bottom:15px; }
-.char .avatar, .pc .avatar { width:40px; height:40px; border-radius:50%; background:#aaa; flex-shrink:0; }
-.char .msg-container, .pc .msg-container { margin-left:10px; max-width:280px; }
-.pc { flex-direction: row-reverse; }
-.pc .msg-container { margin-right:10px; margin-left:0; }
-.msg-content { background:#f1f1f1; padding:8px 12px; border-radius:10px; white-space:pre-wrap; }
-.pc .msg-content { background:#f9cedc; }
-.character-name { font-size:14px; color:#666; margin-bottom:3px; }
-.date-divider { text-align:center; color:#888; font-size:12px; margin:10px 0; }
-.environment { text-align:center; color:#969696; margin:10px 0; font-size:14px; }
-</style>
-</head>
-<body>
-<div class="chat-container">
-${content}
-</div>
-</body>
-</html>`;
-  const blob = new Blob([fullHTML], {type:'text/html'});
-  const url = URL.createObjectURL(blob);
+downloadBtn.addEventListener('click', ()=>{
+  if(!txtContent) { alert('請先轉換'); return; }
+  const htmlStr = parseTXTtoHTML(txtContent);
+  const blob = new Blob([htmlStr], {type:'text/html'});
   const a = document.createElement('a');
-  a.href = url;
+  a.href = URL.createObjectURL(blob);
   a.download = 'chat.html';
   a.click();
-  URL.revokeObjectURL(url);
 });
 </script>
 </body>
