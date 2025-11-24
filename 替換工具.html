@@ -37,17 +37,33 @@
   label {
     font-weight: bold;
   }
+  .rule-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 5px;
+  }
+  .rule-row input {
+    flex: 1;
+    padding: 5px;
+    font-family: monospace;
+  }
 </style>
 </head>
 <body>
 
-<h1>批量程式碼替換工具</h1>
+<h1>批量替換工具</h1>
 
 <label>輸入程式碼：</label>
 <textarea id="input" placeholder="在此輸入程式碼..."></textarea>
 
-<label>批量替換規則 (格式：舊文字 → 新文字，一行一個規則)：</label>
-<textarea id="rules" placeholder="例如：&#10;foo → bar&#10;hello → hi"></textarea>
+<h3>替換規則（左欄: 被替換文字，右欄: 替換成文字）</h3>
+<div id="rulesContainer">
+  <div class="rule-row">
+    <input type="text" class="find" placeholder="被替換文字">
+    <input type="text" class="replace" placeholder="替換成文字">
+  </div>
+</div>
+<button id="addRule">新增規則</button>
 
 <button id="copyBtn">複製結果</button>
 
@@ -57,24 +73,18 @@
 <script>
 const input = document.getElementById('input');
 const output = document.getElementById('output');
-const rulesTextarea = document.getElementById('rules');
+const rulesContainer = document.getElementById('rulesContainer');
 
 function applyRules(text) {
-  const rulesText = rulesTextarea.value;
-  const lines = rulesText.split(/\r?\n/);
-
-  lines.forEach(line => {
-    const parts = line.split('→');
-    if(parts.length === 2) {
-      const findText = parts[0].trim();
-      const replaceText = parts[1].trim();
-      if(findText) {
-        const regex = new RegExp(findText, 'g'); // 全部替換
-        text = text.replace(regex, replaceText);
-      }
+  const rows = rulesContainer.querySelectorAll('.rule-row');
+  rows.forEach(row => {
+    const findText = row.querySelector('.find').value;
+    const replaceText = row.querySelector('.replace').value;
+    if(findText) {
+      const regex = new RegExp(findText, 'g'); // 全部替換
+      text = text.replace(regex, replaceText);
     }
   });
-
   return text;
 }
 
@@ -82,13 +92,26 @@ function updateOutput() {
   output.textContent = applyRules(input.value);
 }
 
+// 監聽輸入框變化
 input.addEventListener('input', updateOutput);
-rulesTextarea.addEventListener('input', updateOutput);
+rulesContainer.addEventListener('input', updateOutput);
 
+// 複製結果
 document.getElementById('copyBtn').addEventListener('click', () => {
   navigator.clipboard.writeText(output.textContent).then(() => {
     alert('已複製到剪貼簿！');
   });
+});
+
+// 新增規則行
+document.getElementById('addRule').addEventListener('click', () => {
+  const row = document.createElement('div');
+  row.className = 'rule-row';
+  row.innerHTML = `
+    <input type="text" class="find" placeholder="被替換文字">
+    <input type="text" class="replace" placeholder="替換成文字">
+  `;
+  rulesContainer.appendChild(row);
 });
 </script>
 
