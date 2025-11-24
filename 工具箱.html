@@ -3,96 +3,167 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TXT 轉聊天頁面</title>
+<title>拉比的工具箱 - 單機版</title>
 <style>
-body { font-family:'Noto Sans TC', sans-serif; background:#FFF5F8; margin:0; padding:0; color:#333; }
-.chat-container { max-width:600px; margin:0 auto; padding:20px; }
-.date-divider { text-align:center; color:#888; margin:10px 0; font-size:12px; }
-.char, .pc { display:flex; margin-bottom:15px; align-items:flex-start; }
-.avatar { width:40px; height:40px; border-radius:50%; flex-shrink:0; background-size:cover; background-position:center; margin-right:10px; }
-.ava-char { background-color:#E0E0E0; }
-.ava-pc { background-color:#F9CEDC; }
-.msg-container { max-width:70%; display:flex; flex-direction:column; }
-.character-name { font-size:14px; color:#888; margin-bottom:4px; }
-.msg-content { background:#fff; padding:8px 12px; border-radius:4px 16px 16px 16px; font-size:15px; }
-.msg-timestamp { font-size:12px; color:#888; margin-top:4px; align-self:flex-end; }
-.pc .msg-content { background:#F9CEDC; border-radius:16px 16px 4px 16px; }
+body { font-family:'Noto Sans TC',sans-serif; background:#f9f9f9; color:#333; margin:0; padding:20px;}
+.container { max-width: 900px; margin: auto; }
+header { text-align:center; margin-bottom:20px;}
+h1 { font-size:2em; margin-bottom:5px;}
+h2 { font-size:1.2em; margin-bottom:10px;}
+section { background:#fff; padding:15px; border-radius:8px; margin-bottom:15px; box-shadow:0 2px 5px rgba(0,0,0,0.1);}
+input[type=file] { display:none;}
+label.file-label { display:block; border:2px dashed #ccc; padding:20px; text-align:center; cursor:pointer; border-radius:6px; }
+input[type=range] { width:100%; }
+select, button { padding:6px 10px; margin-top:5px; border-radius:4px; border:1px solid #ccc; }
+iframe { width:100%; height:500px; border:0; }
+.avatar-preview { width:40px; height:40px; border-radius:50%; border:1px solid #ccc; background-size:cover; background-position:center; margin-right:10px; display:inline-block;}
+.flex { display:flex; align-items:center; }
+.space-between { justify-content:space-between; }
 </style>
 </head>
 <body>
+<div class="container">
+<header>
+<h1>拉比的工具箱 - 單機版</h1>
+<p>上傳文字檔案，套用樣式，轉換為美化 HTML</p>
+</header>
 
-<input type="file" id="fileInput" accept=".txt">
-<div class="chat-container" id="chatContainer"></div>
+<section>
+<h2>上傳 TXT 文件</h2>
+<label class="file-label" for="txtUpload">點擊選取 .txt 文件</label>
+<input type="file" id="txtUpload" accept=".txt">
+</section>
+
+<section>
+<h2>選擇聊天室主題</h2>
+<select id="themeSelect">
+<option value="basic" selected>基礎</option>
+<option value="black">黑色</option>
+<option value="brown">棕色</option>
+<option value="green">綠色</option>
+</select>
+</section>
+
+<section>
+<h2>上傳角色頭像 / 玩家頭像</h2>
+<div class="flex">
+<div>
+<label>角色頭像</label><br>
+<div class="avatar-preview" id="charAvatar"></div>
+<input type="file" id="charUpload" accept="image/*">
+<button onclick="document.getElementById('charUpload').click()">上傳圖片</button>
+</div>
+<div style="margin-left:20px;">
+<label>玩家頭像</label><br>
+<div class="avatar-preview" id="pcAvatar"></div>
+<input type="file" id="pcUpload" accept="image/*">
+<button onclick="document.getElementById('pcUpload').click()">上傳圖片</button>
+</div>
+</div>
+</section>
+
+<section>
+<h2>調整訊息寬度</h2>
+<div class="flex space-between">
+<span>280px</span>
+<input type="range" id="msgWidth" min="280" max="400" step="10" value="280">
+<span>400px</span>
+</div>
+</section>
+
+<section>
+<button id="downloadBtn">下載 HTML 文件</button>
+</section>
+
+<section>
+<h2>預覽（前 40 則訊息）</h2>
+<iframe id="previewIframe"></iframe>
+</section>
+</div>
 
 <script>
-const chatContainer = document.getElementById('chatContainer');
-document.getElementById('fileInput').addEventListener('change', function(e){
-  const file = e.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = function(evt){
-    const text = evt.target.result;
-    parseAndRender(text);
-  };
-  reader.readAsText(file, 'UTF-8');
+let txtContent = '';
+let charAvatar = '';
+let pcAvatar = '';
+
+document.getElementById('txtUpload').addEventListener('change', function(e){
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e){
+        txtContent = e.target.result;
+        renderPreview();
+    }
+    reader.readAsText(file, 'UTF-8');
 });
 
-// 範例 TXT 格式:
-// [2025-05-23]
-// 米羅: 你好，地球人。
-// PC: 警告，請退後。
-function parseAndRender(text){
-  chatContainer.innerHTML = '';
-  const lines = text.split(/\r?\n/);
-  let currentDate = '';
-  lines.forEach(line => {
-    line = line.trim();
-    if(!line) return;
-    const dateMatch = line.match(/^\[(\d{4}-\d{2}-\d{2})\]$/);
-    if(dateMatch){
-      currentDate = dateMatch[1];
-      const div = document.createElement('div');
-      div.className = 'date-divider';
-      div.textContent = currentDate;
-      chatContainer.appendChild(div);
-    } else {
-      const parts = line.split(':');
-      if(parts.length < 2) return;
-      const role = parts[0].trim();
-      const msg = parts.slice(1).join(':').trim();
+document.getElementById('themeSelect').addEventListener('change', renderPreview);
+document.getElementById('msgWidth').addEventListener('input', renderPreview);
 
-      const wrapper = document.createElement('div');
-      wrapper.className = role.toLowerCase() === 'pc' ? 'pc' : 'char';
-
-      const avatar = document.createElement('div');
-      avatar.className = 'avatar ' + (role.toLowerCase() === 'pc' ? 'ava-pc' : 'ava-char');
-      wrapper.appendChild(avatar);
-
-      const msgContainer = document.createElement('div');
-      msgContainer.className = 'msg-container';
-      if(role.toLowerCase() !== 'pc'){
-        const nameDiv = document.createElement('div');
-        nameDiv.className = 'character-name';
-        nameDiv.textContent = role;
-        msgContainer.appendChild(nameDiv);
-      }
-
-      const contentDiv = document.createElement('div');
-      contentDiv.className = 'msg-content';
-      contentDiv.innerHTML = msg.replace(/\*\*(.+?)\*\*/g, '<em>$1</em>'); // 支援 **斜體**
-      msgContainer.appendChild(contentDiv);
-
-      const timeDiv = document.createElement('div');
-      timeDiv.className = 'msg-timestamp';
-      timeDiv.textContent = '00:00';
-      msgContainer.appendChild(timeDiv);
-
-      wrapper.appendChild(msgContainer);
-      chatContainer.appendChild(wrapper);
+document.getElementById('charUpload').addEventListener('change', function(e){
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e){
+        charAvatar = e.target.result;
+        document.getElementById('charAvatar').style.backgroundImage = `url('${charAvatar}')`;
+        renderPreview();
     }
-  });
-}
-</script>
+    reader.readAsDataURL(file);
+});
 
+document.getElementById('pcUpload').addEventListener('change', function(e){
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e){
+        pcAvatar = e.target.result;
+        document.getElementById('pcAvatar').style.backgroundImage = `url('${pcAvatar}')`;
+        renderPreview();
+    }
+    reader.readAsDataURL(file);
+});
+
+function renderPreview(){
+    const theme = document.getElementById('themeSelect').value;
+    const msgW = document.getElementById('msgWidth').value;
+    if(!txtContent) return;
+
+    const lines = txtContent.split('\n').slice(0,40);
+    const chatHTML = lines.map((line,i)=> {
+        const isPC = i%2===1;
+        const avatar = isPC ? pcAvatar : charAvatar;
+        return `<div style="display:flex;margin-bottom:10px;${isPC?'flex-direction:row-reverse':''}">
+            <div style="width:${msgW}px; background:${theme==='black'?'#222':theme==='brown'?'#D2B48C':theme==='green'?'#D4EDDA':'#f5f5f5'}; color:${theme==='black'?'#eee':'#333'}; padding:8px 12px; border-radius:8px; font-size:15px;">${line}</div>
+            <div style="width:40px;height:40px;border-radius:50%;background-image:url('${avatar}');background-size:cover;margin:${isPC?'0 0 0 10px':'0 10px 0 0'};"></div>
+        </div>`;
+    }).join('');
+
+    const html = `
+    <html>
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+    body { font-family:'Noto Sans TC',sans-serif; background:${theme==='black'?'#111':theme==='brown'?'#FFF5E1':theme==='green'?'#F0FFF0':'#fff'}; color:${theme==='black'?'#eee':'#333'}; margin:0; padding:20px; }
+    </style>
+    </head>
+    <body>
+    <div class="chat-container">${chatHTML}</div>
+    </body>
+    </html>`;
+
+    document.getElementById('previewIframe').srcdoc = html;
+}
+
+document.getElementById('downloadBtn').addEventListener('click', function(){
+    const iframe = document.getElementById('previewIframe');
+    const blob = new Blob([iframe.srcdoc], {type:'text/html'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'chat.html';
+    a.click();
+});
+</script>
 </body>
 </html>
