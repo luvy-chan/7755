@@ -42,10 +42,11 @@
     gap: 10px;
     margin-bottom: 5px;
   }
-  .rule-row input {
+  .rule-row textarea {
     flex: 1;
     padding: 5px;
     font-family: monospace;
+    height: 60px;
   }
 </style>
 </head>
@@ -59,8 +60,8 @@
 <h3>替換規則（左欄: 被替換文字，右欄: 替換成文字）</h3>
 <div id="rulesContainer">
   <div class="rule-row">
-    <input type="text" class="find" placeholder="被替換文字">
-    <input type="text" class="replace" placeholder="替換成文字">
+    <textarea class="find" placeholder="被替換文字"></textarea>
+    <textarea class="replace" placeholder="替換成文字"></textarea>
   </div>
 </div>
 <button id="addRule">新增規則</button>
@@ -81,7 +82,8 @@ function applyRules(text) {
     const findText = row.querySelector('.find').value;
     const replaceText = row.querySelector('.replace').value;
     if(findText) {
-      const regex = new RegExp(findText, 'g'); // 全部替換
+      // 使用 gs 標誌支援跨行替換
+      const regex = new RegExp(findText, 'gs');
       text = text.replace(regex, replaceText);
     }
   });
@@ -108,8 +110,8 @@ document.getElementById('addRule').addEventListener('click', () => {
   const row = document.createElement('div');
   row.className = 'rule-row';
   row.innerHTML = `
-    <input type="text" class="find" placeholder="被替換文字">
-    <input type="text" class="replace" placeholder="替換成文字">
+    <textarea class="find" placeholder="被替換文字"></textarea>
+    <textarea class="replace" placeholder="替換成文字"></textarea>
   `;
   rulesContainer.appendChild(row);
 });
