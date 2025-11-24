@@ -3,131 +3,116 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>拉比的工具箱 - 單機版</title>
+<title>單機版拉比工具箱</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500&display=swap');
-body{ font-family:'Noto Sans TC','Arial',sans-serif; background:#f0f0f0; margin:0; padding:0;}
-.container{ max-width:1200px; margin:20px auto; display:flex; gap:20px; }
-.panel{ background:#fff; padding:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); flex:1; display:flex; flex-direction:column; }
-.panel h2{ margin-top:0; }
-textarea{ width:100%; height:300px; padding:10px; font-size:14px; resize:none; }
-button{ padding:10px 15px; border:none; background:#4f46e5; color:#fff; border-radius:5px; cursor:pointer; margin-top:10px; }
-button:hover{ background:#3730a3; }
-iframe{ width:100%; flex:1; border:1px solid #ccc; border-radius:5px; }
-
-.chat-container{ max-width:500px; margin:0 auto; padding:10px;}
-.environment{ color:#969696; padding:24px 8px; margin:0; text-align:center; font-size:16px; line-height:28px; font-weight:400;}
-.date-divider{ font-size:12px; color:#888888; text-align:center; margin:10px 0;}
-.char, .pc{ display:flex; align-items:flex-start; margin-bottom:15px;}
-.avatar{ width:40px; height:40px; border-radius:50%; overflow:hidden; flex-shrink:0; background-size:cover; background-position:center; background-repeat:no-repeat;}
-.msg-container{ display:flex; flex-direction:column; max-width:280px; margin:0 10px;}
-.character-name{ font-size:14px; margin-bottom:4px; color:#888;}
-.char .msg-content{ background:#fff; color:#333; padding:8px 12px; border-radius:4px 16px 16px 16px; font-size:15px;}
-.pc .msg-content{ background:#f9cedc; color:#333; padding:8px 12px; border-radius:16px 16px 4px 16px; font-size:15px;}
-.msg-timestamp{ font-size:12px; color:#888; margin-top:4px; align-self:flex-end;}
+  body { font-family: 'Noto Sans TC', sans-serif; background:#f9f9f9; padding:20px; }
+  .container { max-width:900px; margin:auto; }
+  h1 { text-align:center; }
+  .section { background:white; padding:15px; margin-bottom:20px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.1);}
+  .preview { border:1px solid #ccc; height:400px; overflow:auto; padding:10px; background:#fff;}
+  .download-btn { background:#3b82f6;color:white;padding:10px 15px;border:none;border-radius:5px;cursor:pointer;}
+  .char, .pc { display:flex; margin-bottom:15px; }
+  .char .avatar, .pc .avatar { width:40px; height:40px; border-radius:50%; background:#aaa; flex-shrink:0; }
+  .char .msg-container, .pc .msg-container { margin-left:10px; max-width:280px; }
+  .pc { flex-direction: row-reverse; }
+  .pc .msg-container { margin-right:10px; margin-left:0; }
+  .msg-content { background:#f1f1f1; padding:8px 12px; border-radius:10px; white-space:pre-wrap; }
+  .pc .msg-content { background:#f9cedc; }
+  .character-name { font-size:14px; color:#666; margin-bottom:3px; }
+  .date-divider { text-align:center; color:#888; font-size:12px; margin:10px 0; }
+  .environment { text-align:center; color:#969696; margin:10px 0; font-size:14px; }
 </style>
 </head>
 <body>
 <div class="container">
-  <div class="panel">
-    <h2>上傳 TXT 檔案</h2>
-    <input type="file" id="txtFile" accept=".txt">
-    <h2>或貼上內容</h2>
-    <textarea id="txtContent" placeholder="貼上 TXT 文字..."></textarea>
-    <button id="convertBtn">轉換為 HTML</button>
-    <button id="downloadBtn">下載 HTML 檔案</button>
-  </div>
-  <div class="panel">
-    <h2>預覽</h2>
-    <iframe id="previewFrame"></iframe>
-  </div>
+<h1>單機版拉比工具箱</h1>
+
+<div class="section">
+  <h2>上傳 TXT 文件</h2>
+  <input type="file" id="fileInput" accept=".txt">
+</div>
+
+<div class="section">
+  <h2>預覽</h2>
+  <div class="preview" id="preview"></div>
+</div>
+
+<div class="section">
+  <button class="download-btn" id="downloadBtn">下載 HTML 文件</button>
+</div>
 </div>
 
 <script>
-const txtFile = document.getElementById('txtFile');
-const txtContent = document.getElementById('txtContent');
-const convertBtn = document.getElementById('convertBtn');
-const previewFrame = document.getElementById('previewFrame');
-const downloadBtn = document.getElementById('downloadBtn');
+function escapeHTML(str){
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
 
-txtFile.addEventListener('change', function(){
-  const file = this.files[0];
+function parseTXT(txt){
+  const lines = txt.split(/\r?\n/);
+  let html = '';
+  let currentDate = '';
+  lines.forEach(line=>{
+    let dateMatch = line.match(/^\[([\d\-\:\s]+)\] Environment/);
+    if(dateMatch){
+      currentDate = dateMatch[1].split(' ')[0];
+      html += `<div class="date-divider">${currentDate}</div>`;
+      html += `<div class="environment">${escapeHTML(line.replace(/^\[.*?\] Environment \(system\):\s*/,''))}</div>`;
+    } else if(line.match(/^\[([\d\-\:\s]+)\] (.*?):/)){
+      let m = line.match(/^\[([\d\-\:\s]+)\] (.*?):\s*(.*)/);
+      let time = m[1].split(' ')[1];
+      let name = m[2];
+      let msg = m[3];
+      html += `<div class="char"><div class="avatar"></div><div class="msg-container"><div class="character-name">${escapeHTML(name)}</div><div class="msg-content">${escapeHTML(msg)}</div></div><div class="msg-timestamp">${time}</div></div>`;
+    } else if(line.trim()==='') {
+      html += '<br>';
+    } else {
+      html += `<div class="char"><div class="avatar"></div><div class="msg-container"><div class="msg-content">${escapeHTML(line)}</div></div></div>`;
+    }
+  });
+  return html;
+}
+
+document.getElementById('fileInput').addEventListener('change', e=>{
+  const file = e.target.files[0];
   if(!file) return;
   const reader = new FileReader();
-  reader.onload = function(e){
-    txtContent.value = e.target.result;
-  }
+  reader.onload = function(evt){
+    const txt = evt.target.result;
+    const html = parseTXT(txt);
+    document.getElementById('preview').innerHTML = html;
+  };
   reader.readAsText(file, 'UTF-8');
 });
 
-function generateHTML(txt){
-  // 將 TXT 分行
-  const lines = txt.split(/\r?\n/);
-  let htmlContent = `<div class="chat-container">\n`;
-  
-  lines.forEach(line=>{
-    line = line.trim();
-    if(!line) return;
-    // 判斷是否為日期
-    if(/\d{4}-\d{2}-\d{2}/.test(line)){
-      htmlContent += `<div class="date-divider">${line}</div>\n`;
-    }
-    // 判斷是否為環境描述（用 *** 標記）
-    else if(line.startsWith("***") && line.endsWith("***")){
-      const content = line.replace(/\*\*\*/g,'');
-      htmlContent += `<div class="environment"><span class="stars">***</span>${content}<span class="stars">***</span></div>\n`;
-    }
-    // 判斷角色訊息：格式 "角色名: 訊息"
-    else if(line.includes(":")){
-      const [name, msg] = line.split(":");
-      htmlContent += `<div class="char">
-        <div class="avatar" style="background-image:url('');"></div>
-        <div class="msg-container">
-          <div class="character-name">${name}</div>
-          <div class="msg-content">${msg.replace(/\n/g,'<br>')}</div>
-        </div>
-        <div class="msg-timestamp"></div>
-      </div>\n`;
-    } else {
-      // 玩家訊息 (PC)
-      htmlContent += `<div class="pc">
-        <div class="avatar" style="background-image:url('');"></div>
-        <div class="msg-container">
-          <div class="msg-content">${line.replace(/\n/g,'<br>')}</div>
-        </div>
-        <div class="msg-timestamp"></div>
-      </div>\n`;
-    }
-  });
-
-  htmlContent += `</div>`;
+document.getElementById('downloadBtn').addEventListener('click', ()=>{
+  const content = document.getElementById('preview').innerHTML;
   const fullHTML = `<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>轉換結果</title>
+<title>聊天紀錄</title>
 <style>
-${document.querySelector('style').innerHTML}
+body { font-family: 'Noto Sans TC', sans-serif; background:#f9f9f9; padding:20px; }
+.char, .pc { display:flex; margin-bottom:15px; }
+.char .avatar, .pc .avatar { width:40px; height:40px; border-radius:50%; background:#aaa; flex-shrink:0; }
+.char .msg-container, .pc .msg-container { margin-left:10px; max-width:280px; }
+.pc { flex-direction: row-reverse; }
+.pc .msg-container { margin-right:10px; margin-left:0; }
+.msg-content { background:#f1f1f1; padding:8px 12px; border-radius:10px; white-space:pre-wrap; }
+.pc .msg-content { background:#f9cedc; }
+.character-name { font-size:14px; color:#666; margin-bottom:3px; }
+.date-divider { text-align:center; color:#888; font-size:12px; margin:10px 0; }
+.environment { text-align:center; color:#969696; margin:10px 0; font-size:14px; }
 </style>
 </head>
 <body>
-${htmlContent}
+<div class="chat-container">
+${content}
+</div>
 </body>
 </html>`;
-  return fullHTML;
-}
-
-convertBtn.addEventListener('click', ()=>{
-  const html = generateHTML(txtContent.value);
-  previewFrame.srcdoc = html;
-  downloadBtn.dataset.html = html;
-});
-
-downloadBtn.addEventListener('click', ()=>{
-  const html = downloadBtn.dataset.html;
-  if(!html){ alert('請先轉換內容'); return; }
-  const blob = new Blob([html], {type:'text/html'});
+  const blob = new Blob([fullHTML], {type:'text/html'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
