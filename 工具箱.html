@@ -3,167 +3,222 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>拉比的工具箱 - 單機版</title>
+<title>拉比的工具箱（單機版）</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.2/dist/tailwind.min.css" rel="stylesheet">
 <style>
-body { font-family:'Noto Sans TC',sans-serif; background:#f9f9f9; color:#333; margin:0; padding:20px;}
-.container { max-width: 900px; margin: auto; }
-header { text-align:center; margin-bottom:20px;}
-h1 { font-size:2em; margin-bottom:5px;}
-h2 { font-size:1.2em; margin-bottom:10px;}
-section { background:#fff; padding:15px; border-radius:8px; margin-bottom:15px; box-shadow:0 2px 5px rgba(0,0,0,0.1);}
-input[type=file] { display:none;}
-label.file-label { display:block; border:2px dashed #ccc; padding:20px; text-align:center; cursor:pointer; border-radius:6px; }
-input[type=range] { width:100%; }
-select, button { padding:6px 10px; margin-top:5px; border-radius:4px; border:1px solid #ccc; }
-iframe { width:100%; height:500px; border:0; }
-.avatar-preview { width:40px; height:40px; border-radius:50%; border:1px solid #ccc; background-size:cover; background-position:center; margin-right:10px; display:inline-block;}
-.flex { display:flex; align-items:center; }
-.space-between { justify-content:space-between; }
+  body { transition: background-color 0.3s, color 0.3s; }
+  .chat-container{ max-width:500px;margin:0 auto;padding:10px; }
+  .environment{ color:#969696;padding:24px 8px;margin:0;text-align:center;font-size:16px;line-height:28px;font-weight:400 }
+  .date-divider{ font-size:12px;color:#888;text-align:center;margin:10px 0 }
+  .char, .pc{ display:flex;align-items:flex-start;margin-bottom:15px }
+  .pc{ flex-direction:row-reverse;align-items:flex-end }
+  .avatar{ width:40px;height:40px;border-radius:50%;overflow:hidden;background-size:cover;background-position:center;background-repeat:no-repeat; flex-shrink:0; }
+  .msg-container{ display:flex;flex-direction:column;margin:0 10px; }
+  .character-name{ font-size:14px;margin-bottom:4px;color:#888 }
+  .msg-content{ background-color:#FFF;padding:8px 12px;border-radius:4px 16px 16px 16px;font-size:15px; font-weight:400; color:#333; }
+  .pc .msg-content{ background-color:#F9CEDC; border-radius:16px 16px 4px 16px; }
+  .msg-timestamp{ font-size:12px;color:#888;margin-top:4px; align-self:flex-end; }
 </style>
 </head>
-<body>
-<div class="container">
-<header>
-<h1>拉比的工具箱 - 單機版</h1>
-<p>上傳文字檔案，套用樣式，轉換為美化 HTML</p>
-</header>
+<body class="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-white p-6">
 
-<section>
-<h2>上傳 TXT 文件</h2>
-<label class="file-label" for="txtUpload">點擊選取 .txt 文件</label>
-<input type="file" id="txtUpload" accept=".txt">
-</section>
+<div class="max-w-4xl mx-auto">
 
-<section>
-<h2>選擇聊天室主題</h2>
-<select id="themeSelect">
-<option value="basic" selected>基礎</option>
-<option value="black">黑色</option>
-<option value="brown">棕色</option>
-<option value="green">綠色</option>
-</select>
-</section>
+  <header class="mb-8 text-center">
+    <h1 class="text-3xl font-bold mb-2">拉比的工具箱</h1>
+    <p class="text-gray-600 dark:text-gray-300">上傳文字檔案，套用樣式，轉換為美化 HTML</p>
+  </header>
 
-<section>
-<h2>上傳角色頭像 / 玩家頭像</h2>
-<div class="flex">
-<div>
-<label>角色頭像</label><br>
-<div class="avatar-preview" id="charAvatar"></div>
-<input type="file" id="charUpload" accept="image/*">
-<button onclick="document.getElementById('charUpload').click()">上傳圖片</button>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+    <!-- 左側工具欄 -->
+    <div class="md:col-span-1 space-y-6">
+
+      <!-- 上傳 TXT -->
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold mb-4">上傳文件</h2>
+        <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 transition-colors min-h-[100px]" id="txt-dropzone">
+          <input type="file" accept=".txt" class="hidden" id="txt-file">
+          <div class="flex flex-col items-center justify-center min-h-[100px]">
+            <svg class="w-8 h-8 text-gray-400 dark:text-gray-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+            </svg>
+            <p class="text-xs text-gray-600 dark:text-gray-400">點擊或拖曳 .txt 文件</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 主題 -->
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold mb-4">選擇聊天室主題</h2>
+        <select class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white" id="theme-select">
+          <option value="basic" selected>基礎</option>
+          <option value="black">黑色</option>
+          <option value="brown">棕色</option>
+          <option value="green">綠色</option>
+        </select>
+      </div>
+
+      <!-- 頭像 -->
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold mb-4">選擇頭像</h2>
+        <div>
+          <label class="block text-sm font-medium mb-2">角色 頭像</label>
+          <div class="flex items-center space-x-4">
+            <div class="w-12 h-12 rounded-full overflow-hidden border border-gray-300 dark:border-gray-600" id="char-avatar" style="background-image:url('https://via.placeholder.com/40')"></div>
+            <button class="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors text-sm" id="char-upload-btn">上傳圖片</button>
+            <input type="file" accept="image/*" class="hidden" id="char-upload">
+          </div>
+        </div>
+        <div class="mt-4">
+          <label class="block text-sm font-medium mb-2">玩家 頭像</label>
+          <div class="flex items-center space-x-4">
+            <div class="w-12 h-12 rounded-full overflow-hidden border border-gray-300 dark:border-gray-600" id="pc-avatar" style="background-image:url('https://via.placeholder.com/40')"></div>
+            <button class="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors text-sm" id="pc-upload-btn">上傳圖片</button>
+            <input type="file" accept="image/*" class="hidden" id="pc-upload">
+          </div>
+        </div>
+      </div>
+
+      <!-- 訊息寬度 -->
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold mb-4">調整訊息寬度</h2>
+        <div class="flex items-center space-x-2">
+          <span class="text-xs text-gray-500">280px</span>
+          <input type="range" min="280" max="400" step="15" value="280" id="msg-width" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700">
+          <span class="text-xs text-gray-500">400px</span>
+        </div>
+      </div>
+
+      <!-- 下載 -->
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+        <button class="w-full py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-md shadow transition-colors" id="download-btn">下載 HTML 文件</button>
+      </div>
+
+    </div>
+
+    <!-- 預覽區 -->
+    <div class="md:col-span-2">
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md h-full">
+        <h2 class="text-xl font-semibold mb-4">預覽</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">（預覽畫面僅顯示前 40 則訊息，可滾動查看內容）</p>
+        <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden p-4 max-h-[735px] overflow-auto" id="chat-preview">
+          <!-- 聊天訊息將顯示在這裡 -->
+        </div>
+      </div>
+    </div>
+
+  </div>
+
 </div>
-<div style="margin-left:20px;">
-<label>玩家頭像</label><br>
-<div class="avatar-preview" id="pcAvatar"></div>
-<input type="file" id="pcUpload" accept="image/*">
-<button onclick="document.getElementById('pcUpload').click()">上傳圖片</button>
-</div>
-</div>
-</section>
 
-<section>
-<h2>調整訊息寬度</h2>
-<div class="flex space-between">
-<span>280px</span>
-<input type="range" id="msgWidth" min="280" max="400" step="10" value="280">
-<span>400px</span>
-</div>
-</section>
-
-<section>
-<button id="downloadBtn">下載 HTML 文件</button>
-</section>
-
-<section>
-<h2>預覽（前 40 則訊息）</h2>
-<iframe id="previewIframe"></iframe>
-</section>
-</div>
+<footer class="mt-12 text-center text-sm text-gray-500 dark:text-gray-400">
+  <p>拉比的工具箱 © 2025</p>
+</footer>
 
 <script>
-let txtContent = '';
-let charAvatar = '';
-let pcAvatar = '';
+  const txtDropzone = document.getElementById('txt-dropzone');
+  const txtFileInput = document.getElementById('txt-file');
+  const chatPreview = document.getElementById('chat-preview');
+  const charAvatar = document.getElementById('char-avatar');
+  const pcAvatar = document.getElementById('pc-avatar');
+  const charUpload = document.getElementById('char-upload');
+  const pcUpload = document.getElementById('pc-upload');
+  const msgWidthSlider = document.getElementById('msg-width');
+  const themeSelect = document.getElementById('theme-select');
+  const downloadBtn = document.getElementById('download-btn');
 
-document.getElementById('txtUpload').addEventListener('change', function(e){
-    const file = e.target.files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = function(e){
-        txtContent = e.target.result;
-        renderPreview();
+  let chatHTML = '';
+
+  // 拖放或點擊上傳 TXT
+  txtDropzone.addEventListener('click', () => txtFileInput.click());
+  txtDropzone.addEventListener('dragover', e => e.preventDefault());
+  txtDropzone.addEventListener('drop', e => {
+    e.preventDefault();
+    if(e.dataTransfer.files[0]) {
+      handleFile(e.dataTransfer.files[0]);
     }
+  });
+  txtFileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+
+  function handleFile(file){
+    const reader = new FileReader();
+    reader.onload = e => {
+      parseTXT(e.target.result);
+    };
     reader.readAsText(file, 'UTF-8');
-});
+  }
 
-document.getElementById('themeSelect').addEventListener('change', renderPreview);
-document.getElementById('msgWidth').addEventListener('input', renderPreview);
+  function parseTXT(text){
+    // 範例：將每行文字分為角色和訊息 (可自定義解析規則)
+    chatPreview.innerHTML = '';
+    const lines = text.split(/\r?\n/).slice(0,40); // 最多40行
+    chatHTML = '';
+    lines.forEach(line=>{
+      let charType = line.includes('PC:') ? 'pc' : 'char';
+      let msg = line.replace(/^PC:\s*/,'').replace(/^CHAR:\s*/,'');
+      let div = document.createElement('div');
+      div.className = charType;
+      div.innerHTML = `
+        <div class="avatar" style="background-image:url('${charType==='char'?charAvatar.style.backgroundImage.replace('url("','').replace('")',''):pcAvatar.style.backgroundImage.replace('url("','').replace('")','')}')"></div>
+        <div class="msg-container" style="max-width:${msgWidthSlider.value}px">
+          ${charType==='char'?'<div class="character-name">角色</div>':''}
+          <div class="msg-content">${msg}</div>
+        </div>
+        <div class="msg-timestamp">22:00</div>
+      `;
+      chatPreview.appendChild(div);
+      chatHTML += div.outerHTML;
+    });
+  }
 
-document.getElementById('charUpload').addEventListener('change', function(e){
+  // 頭像上傳
+  charUpload.addEventListener('change', e => {
     const file = e.target.files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = function(e){
-        charAvatar = e.target.result;
-        document.getElementById('charAvatar').style.backgroundImage = `url('${charAvatar}')`;
-        renderPreview();
+    if(file){
+      const reader = new FileReader();
+      reader.onload = e => charAvatar.style.backgroundImage = `url(${e.target.result})`;
+      reader.readAsDataURL(file);
+      if(chatPreview.innerHTML) parseTXT(txtFileInput.files[0].name ? txtFileInput.files[0] : {text: txtFileInput.value});
     }
-    reader.readAsDataURL(file);
-});
-
-document.getElementById('pcUpload').addEventListener('change', function(e){
+  });
+  pcUpload.addEventListener('change', e => {
     const file = e.target.files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = function(e){
-        pcAvatar = e.target.result;
-        document.getElementById('pcAvatar').style.backgroundImage = `url('${pcAvatar}')`;
-        renderPreview();
+    if(file){
+      const reader = new FileReader();
+      reader.onload = e => pcAvatar.style.backgroundImage = `url(${e.target.result})`;
     }
-    reader.readAsDataURL(file);
-});
+  });
+  document.getElementById('char-upload-btn').addEventListener('click', ()=>charUpload.click());
+  document.getElementById('pc-upload-btn').addEventListener('click', ()=>pcUpload.click());
 
-function renderPreview(){
-    const theme = document.getElementById('themeSelect').value;
-    const msgW = document.getElementById('msgWidth').value;
-    if(!txtContent) return;
+  // 訊息寬度
+  msgWidthSlider.addEventListener('input', ()=> {
+    chatPreview.querySelectorAll('.msg-container').forEach(el=>el.style.maxWidth = msgWidthSlider.value+'px');
+  });
 
-    const lines = txtContent.split('\n').slice(0,40);
-    const chatHTML = lines.map((line,i)=> {
-        const isPC = i%2===1;
-        const avatar = isPC ? pcAvatar : charAvatar;
-        return `<div style="display:flex;margin-bottom:10px;${isPC?'flex-direction:row-reverse':''}">
-            <div style="width:${msgW}px; background:${theme==='black'?'#222':theme==='brown'?'#D2B48C':theme==='green'?'#D4EDDA':'#f5f5f5'}; color:${theme==='black'?'#eee':'#333'}; padding:8px 12px; border-radius:8px; font-size:15px;">${line}</div>
-            <div style="width:40px;height:40px;border-radius:50%;background-image:url('${avatar}');background-size:cover;margin:${isPC?'0 0 0 10px':'0 10px 0 0'};"></div>
-        </div>`;
-    }).join('');
-
-    const html = `
-    <html>
-    <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-    body { font-family:'Noto Sans TC',sans-serif; background:${theme==='black'?'#111':theme==='brown'?'#FFF5E1':theme==='green'?'#F0FFF0':'#fff'}; color:${theme==='black'?'#eee':'#333'}; margin:0; padding:20px; }
-    </style>
-    </head>
-    <body>
-    <div class="chat-container">${chatHTML}</div>
-    </body>
-    </html>`;
-
-    document.getElementById('previewIframe').srcdoc = html;
-}
-
-document.getElementById('downloadBtn').addEventListener('click', function(){
-    const iframe = document.getElementById('previewIframe');
-    const blob = new Blob([iframe.srcdoc], {type:'text/html'});
+  // 下載 HTML
+  downloadBtn.addEventListener('click', ()=>{
+    const html = `<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>聊天紀錄</title><style>
+      body{ font-family:Arial,sans-serif; background:#FFF;color:#333; line-height:1.6;padding:10px;}
+      .char,.pc{display:flex;align-items:flex-start;margin-bottom:15px;}
+      .pc{flex-direction:row-reverse;align-items:flex-end;}
+      .avatar{width:40px;height:40px;border-radius:50%;flex-shrink:0;background-size:cover;background-position:center;margin-right:10px;}
+      .pc .avatar{margin-left:10px;margin-right:0;}
+      .msg-container{display:flex;flex-direction:column;max-width:${msgWidthSlider.value}px;}
+      .character-name{font-size:14px;margin-bottom:4px;color:#888;}
+      .msg-content{background:#FFF;padding:8px 12px;border-radius:4px 16px 16px 16px;font-size:15px;color:#333;}
+      .pc .msg-content{background:#F9CEDC;border-radius:16px 16px 4px 16px;}
+      .msg-timestamp{font-size:12px;color:#888;margin-top:4px;align-self:flex-end;}
+    </style></head><body>${chatHTML}</body></html>`;
+    const blob = new Blob([html],{type:'text/html'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = 'chat.html';
     a.click();
-});
+  });
+
 </script>
+
 </body>
 </html>
