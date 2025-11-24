@@ -1,0 +1,315 @@
+檢查這份 HTML + JS 能不能直接在本地把任何 .txt 轉成聊天 HTML，並告訴操作流程。
+---
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>拉比的工具箱（靜態版）</title>
+<style>
+  /* 簡易樣式（模仿 Tailwind 風格簡化版） */
+  :root{--bg:#f8fafc;--card:#fff;--muted:#8b8b8b;--accent:#3b82f6}
+  html,body{height:100%;margin:0;font-family:system-ui,-apple-system,"Noto Sans TC","Helvetica Neue",Arial;}
+  body{background:var(--bg);color:#111;padding:24px;box-sizing:border-box}
+  .container{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:320px 1fr;gap:20px}
+  header{grid-column:1/-1;text-align:center;margin-bottom:8px}
+  .card{background:var(--card);padding:16px;border-radius:10px;box-shadow:0 6px 18px rgba(16,24,40,0.06)}
+  h1{margin:0 0 6px 0;font-size:20px}
+  p.desc{margin:0;color:var(--muted)}
+  label{display:block;margin-bottom:6px;font-size:13px;color:#333}
+  .file-drop{border:2px dashed #d1d5db;border-radius:8px;padding:18px;text-align:center;cursor:pointer}
+  .file-drop input{display:none}
+  select,input[type="range"]{width:100%;padding:8px;border-radius:6px;border:1px solid #e5e7eb}
+  .btn{display:inline-block;padding:10px 12px;border-radius:8px;background:var(--accent);color:#fff;border:none;cursor:pointer}
+  .avatar-preview{width:44px;height:44px;border-radius:50%;overflow:hidden;border:1px solid #e5e7eb;background:#eee;display:inline-block;vertical-align:middle}
+  .col-right{display:flex;flex-direction:column;gap:12px}
+  .preview-area{height:640px;overflow:auto;border-radius:8px;border:1px solid #e5e7eb}
+  .controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .range-row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  small{color:var(--muted)}
+  /* themes for generated chat */
+  .theme-basic { --chat-bg: #FFF5F8; --msg-bg: #fff; --pc-bg:#F9CEDC; --muted:#888 }
+  .theme-black { --chat-bg: #0f1724; --msg-bg:#0b1220; --pc-bg:#111827; color:#ddd }
+  .theme-brown { --chat-bg:#fffaf0; --msg-bg:#fff6e6; --pc-bg:#f0dfc2 }
+  .theme-green { --chat-bg:#f0fff4; --msg-bg:#e9fff0; --pc-bg:#cfffe1 }
+  /* utility */
+  .row{display:flex;gap:8px;align-items:center}
+  .spacer{flex:1}
+</style>
+</head>
+<body>
+  <header>
+    <h1>拉比的工具箱（靜態可離線版）</h1>
+    <p class="desc">上傳文字檔案 → 套用樣式 → 產生可下載的美化 HTML</p>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <div>
+        <label>上傳 .txt 文件</label>
+        <div class="file-drop" id="dropzone">點擊或拖放 .txt 檔案到這裡
+          <input id="fileInput" type="file" accept=".txt"/>
+        </div>
+        <small id="fileName"></small>
+      </div>
+
+      <hr style="margin:12px 0">
+
+      <div style="margin-top:8px">
+        <label>選擇聊天室主題</label>
+        <select id="themeSelect">
+          <option value="basic">基礎</option>
+          <option value="black">黑色</option>
+          <option value="brown">棕色</option>
+          <option value="green">綠色</option>
+        </select>
+      </div>
+
+      <div style="margin-top:12px">
+        <label>選擇頭像（角色 / 玩家）</label>
+        <div class="row">
+          <div>
+            <div class="avatar-preview" id="charAvatar" title="角色"></div>
+            <div style="margin-top:6px">
+              <input id="charFile" type="file" accept="image/*">
+            </div>
+          </div>
+          <div>
+            <div class="avatar-preview" id="playerAvatar" title="玩家"></div>
+            <div style="margin-top:6px">
+              <input id="playerFile" type="file" accept="image/*">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <label>調整訊息寬度</label>
+        <div class="range-row">
+          <small>280px</small>
+          <input id="widthRange" type="range" min="280" max="520" step="10" value="360">
+          <small>520px</small>
+        </div>
+        <div style="margin-top:6px"><small>目前寬度：<span id="currentWidth">360</span>px</small></div>
+      </div>
+
+      <div style="margin-top:12px">
+        <button class="btn" id="downloadBtn">下載 HTML 文件</button>
+        <span style="margin-left:8px"><small id="status"></small></span>
+      </div>
+    </section>
+
+    <section class="col-right">
+      <div class="card">
+        <h3 style="margin:0 0 8px 0">預覽（本地）</h3>
+        <p style="margin:0 0 8px 0"><small>（預覽會即時反映上傳檔案、主題、頭像與寬度設定）</small></p>
+        <div class="preview-area" id="previewArea"></div>
+      </div>
+      <div style="text-align:center;color:#777;margin-top:8px">拉比的工具箱 © 2025（靜態版）</div>
+    </section>
+  </main>
+
+<script>
+/* 功能：讀 txt -> 產生聊天 HTML -> 顯示在預覽區 -> 可下載完整 HTML */
+const fileInput = document.getElementById('fileInput');
+const dropzone = document.getElementById('dropzone');
+const fileNameEl = document.getElementById('fileName');
+const previewArea = document.getElementById('previewArea');
+const themeSelect = document.getElementById('themeSelect');
+const widthRange = document.getElementById('widthRange');
+const currentWidth = document.getElementById('currentWidth');
+const downloadBtn = document.getElementById('downloadBtn');
+const statusEl = document.getElementById('status');
+
+let txtContent = "";
+let charAvatarData = "";
+let playerAvatarData = "";
+
+function updatePreview() {
+  const theme = themeSelect.value;
+  const width = parseInt(widthRange.value,10);
+  currentWidth.textContent = width;
+  // Build inner HTML for preview: try to split txt into lines and create chat bubbles
+  const lines = txtContent.split(/\r?\n/).filter(Boolean);
+  // If file empty, show placeholder
+  let messagesHtml = "";
+  if(lines.length === 0){
+    messagesHtml = '<div style="padding:20px;color:#888">尚未上傳或檔案為空</div>';
+  } else {
+    // Heuristic parsing: lines starting with "角色:" treated as left, "玩家:" or other as right
+    lines.forEach((l, idx) => {
+      const escaped = escapeHtml(l);
+      let isPlayer = false;
+      // common markers
+      if(/^玩家[:：\s]/i.test(l) || /^You[:：\s]/i.test(l) || /^[A-Z0-9_\-]{1,12}：/.test(l)) isPlayer = true;
+      if(/^\s*-\s*/.test(l)) isPlayer = true;
+      // alternating fallback
+      if(!/[:：]/.test(l)) isPlayer = (idx % 2 === 1);
+      const avatarStyle = isPlayer ? `background-image:url('${playerAvatarData || defaultAvatar()}')` : `background-image:url('${charAvatarData || defaultAvatar()}')`;
+      if(isPlayer){
+        messagesHtml += `
+          <div style="display:flex;justify-content:flex-end;margin:10px;">
+            <div style="max-width:${width}px; background:var(--pc-bg); padding:10px;border-radius:16px 16px 4px 16px">${escaped}</div>
+            <div style="width:40px;height:40px;border-radius:50%;overflow:hidden;margin-left:8px;background-size:cover;background-position:center;${avatarStyle}"></div>
+          </div>`;
+      } else {
+        messagesHtml += `
+          <div style="display:flex;justify-content:flex-start;margin:10px;">
+            <div style="width:40px;height:40px;border-radius:50%;overflow:hidden;margin-right:8px;background-size:cover;background-position:center;${avatarStyle}"></div>
+            <div style="max-width:${width}px;background:var(--msg-bg);padding:10px;border-radius:4px 16px 16px 16px">${escaped}</div>
+          </div>`;
+      }
+    });
+  }
+
+  // Wrap chat with theme styles
+  let themeClass = 'theme-basic';
+  if(theme === 'black') themeClass = 'theme-black';
+  if(theme === 'brown') themeClass = 'theme-brown';
+  if(theme === 'green') themeClass = 'theme-green';
+
+  const chatHtml = `
+    <div class="${themeClass}" style="padding:16px;min-height:300px;background:var(--chat-bg);color:inherit">
+      <div style="max-width:720px;margin:0 auto">${messagesHtml}</div>
+    </div>
+  `;
+  previewArea.innerHTML = chatHtml;
+}
+
+/* helper */
+function escapeHtml(s){ return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('\\n','<br/>'); }
+function defaultAvatar(){
+  // simple SVG dataurl
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='128' height='128'><rect width='100%' height='100%' fill='%23e5e7eb'/><circle cx='64' cy='50' r='30' fill='%23fafafa'/><rect x='24' y='84' width='80' height='28' rx='12' fill='%23fafafa'/></svg>`;
+  return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+}
+
+/* file handling */
+dropzone.addEventListener('click', ()=> fileInput.click());
+dropzone.addEventListener('dragover', e=>{ e.preventDefault(); dropzone.style.borderColor='#93c5fd'; });
+dropzone.addEventListener('dragleave', e=>{ e.preventDefault(); dropzone.style.borderColor='#d1d5db'; });
+dropzone.addEventListener('drop', e=>{ e.preventDefault(); dropzone.style.borderColor='#d1d5db'; const f = e.dataTransfer.files[0]; if(f) handleTxtFile(f); });
+
+fileInput.addEventListener('change', e=> { const f = e.target.files[0]; if(f) handleTxtFile(f); });
+
+function handleTxtFile(file){
+  if(!file.name.toLowerCase().endsWith('.txt')) { alert('僅支援 .txt 檔'); return; }
+  fileNameEl.textContent = '檔案：' + file.name;
+  const r = new FileReader();
+  r.onload = ev => {
+    txtContent = ev.target.result || "";
+    updatePreview();
+  };
+  r.readAsText(file, 'utf-8');
+}
+
+/* avatar inputs */
+document.getElementById('charFile').addEventListener('change', e=>{
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = ev => { charAvatarData = ev.target.result; document.getElementById('charAvatar').style.backgroundImage = `url('${charAvatarData}')`; updatePreview(); };
+  r.readAsDataURL(f);
+});
+document.getElementById('playerFile').addEventListener('change', e=>{
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = ev => { playerAvatarData = ev.target.result; document.getElementById('playerAvatar').style.backgroundImage = `url('${playerAvatarData}')`; updatePreview(); };
+  r.readAsDataURL(f);
+});
+
+/* theme & width listeners */
+themeSelect.addEventListener('change', updatePreview);
+widthRange.addEventListener('input', updatePreview);
+
+/* download button: produce a full HTML file and trigger download */
+downloadBtn.addEventListener('click', ()=>{
+  if(!txtContent){ alert('請先上傳 .txt 檔案'); return; }
+  statusEl.textContent = '生成中...';
+  setTimeout(()=> {
+    const theme = themeSelect.value;
+    const width = parseInt(widthRange.value,10);
+    const docHtml = buildExportHtml(txtContent, theme, width, charAvatarData, playerAvatarData);
+    const blob = new Blob([docHtml], {type:'text/html;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'loveydovey_chat_export.html';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    statusEl.textContent = '完成，檔案已下載';
+    setTimeout(()=> statusEl.textContent = '', 3000);
+  }, 150);
+});
+
+/* build export HTML - similar layout as preview but standalone */
+function buildExportHtml(txt, theme, width, charAvatar, playerAvatar){
+  // create messages html same as preview but inlined
+  const lines = txt.split(/\r?\n/).filter(Boolean);
+  let messagesHtml = "";
+  if(lines.length===0){
+    messagesHtml = '<div style="padding:20px;color:#888">（空白內容）</div>';
+  } else {
+    lines.forEach((l, idx) => {
+      const escaped = l.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('\\n','<br/>');
+      let isPlayer = false;
+      if(/^玩家[:：\s]/i.test(l) || /^You[:：\s]/i.test(l) || /^[A-Z0-9_\-]{1,12}：/.test(l)) isPlayer = true;
+      if(/^\s*-\s*/.test(l)) isPlayer = true;
+      if(!/[:：]/.test(l)) isPlayer = (idx % 2 === 1);
+      const ava = isPlayer ? (playerAvatar || defaultAvatar()) : (charAvatar || defaultAvatar());
+      if(isPlayer){
+        messagesHtml += `<div style="display:flex;justify-content:flex-end;margin:10px;">
+            <div style="max-width:${width}px;background:var(--pc-bg);padding:10px;border-radius:16px 16px 4px 16px">${escaped}</div>
+            <div style="width:40px;height:40px;border-radius:50%;overflow:hidden;margin-left:8px;background-size:cover;background-position:center;background-image:url('${ava}')"></div>
+          </div>`;
+      } else {
+        messagesHtml += `<div style="display:flex;justify-content:flex-start;margin:10px;">
+            <div style="width:40px;height:40px;border-radius:50%;overflow:hidden;margin-right:8px;background-size:cover;background-position:center;background-image:url('${ava}')"></div>
+            <div style="max-width:${width}px;background:var(--msg-bg);padding:10px;border-radius:4px 16px 16px 16px">${escaped}</div>
+          </div>`;
+      }
+    });
+  }
+
+  // theme vars
+  let themeCss = '';
+  if(theme === 'basic') {
+    themeCss = ':root{--chat-bg:#FFF5F8;--msg-bg:#ffffff;--pc-bg:#F9CEDC;color:#111}';
+  } else if(theme === 'black') {
+    themeCss = ':root{--chat-bg:#0f1724;--msg-bg:#0b1220;--pc-bg:#111827;color:#e5e7eb}';
+  } else if(theme === 'brown') {
+    themeCss = ':root{--chat-bg:#fffaf0;--msg-bg:#fff6e6;--pc-bg:#f0dfc2;color:#111}';
+  } else if(theme === 'green') {
+    themeCss = ':root{--chat-bg:#f0fff4;--msg-bg:#e9fff0;--pc-bg:#cfffe1;color:#111}';
+  }
+
+  const full = `<!doctype html>
+  <html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <title>聊天匯出 - loveydovey</title>
+    <style>
+      ${themeCss}
+      body{font-family:system-ui,-apple-system,'Noto Sans TC',Arial;margin:0;background:var(--chat-bg);color:inherit;padding:20px}
+      .wrap{max-width:900px;margin:0 auto;background:transparent}
+      .chat{padding:16px}
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="chat">
+        ${messagesHtml}
+      </div>
+    </div>
+  </body>
+  </html>`;
+  return full;
+}
+
+/* initialize */
+updatePreview();
+</script>
+</body>
+</html>
