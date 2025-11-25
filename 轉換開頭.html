@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>聊天區塊自動轉換工具</title>
+<title>開頭轉換</title>
 <style>
   body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; text-align: center; }
   textarea { width: 90%; height: 120px; margin-bottom: 10px; font-family: monospace; font-size: 14px; display: block; margin-left: auto; margin-right: auto; }
@@ -12,36 +12,36 @@
 </style>
 </head>
 <body>
-<h2>聊天區塊自動轉換工具</h2>
+<h2>開頭轉換</h2>
 
-<textarea id="inputText" placeholder="貼上原始文字..."></textarea>
+<textarea id="inputText" placeholder="貼上內容"></textarea>
 
 <div class="buttons">
-    <button onclick="pasteFromClipboard()">從剪貼簿貼上</button>
-    <button onclick="copyResult()">複製結果到剪貼簿</button>
+    <button onclick="pasteFromClipboard()">📋 貼上</button>
+    <button onclick="copyResult()">✂️ 複製</button>
 </div>
 
-<textarea id="outputText" placeholder="轉換結果會出現在這裡..." readonly></textarea>
+<textarea id="outputText" placeholder="轉換結果" readonly></textarea>
 
 <script>
-// 轉換區塊函數
+// 將文字區塊轉換
 function convertText(text) {
-    // 正則匹配分隔線 + 角色名字 + 日期時間 + 分隔線
-    const pattern = /=+\n([\s\S]+?)\s*-\s*\n(\d{4})\.(\d{2})\.(\d{2}) .*?\n=+/g;
+    // 正則：支援 \n 或 \r\n 換行，角色名字尾端 - 可有可無
+    const pattern = /=+[\r\n]+([\s\S]+?)\s*-?\s*[\r\n]+(\d{4})\.(\d{2})\.(\d{2})[^\r\n]*[\r\n]+=+/g;
     return text.replace(pattern, (match, role, y, m, d) => {
         role = role.trim();
         return `Date: ${y}-${m}-${d}\nCharacter: ${role}`;
     });
 }
 
-// 自動轉換：input 事件監控
+// 監控 inputText 有內容就自動轉換
 document.getElementById('inputText').addEventListener('input', () => {
     const input = document.getElementById('inputText').value;
     const converted = convertText(input);
     document.getElementById('outputText').value = converted;
 });
 
-// 從剪貼簿貼上到輸入欄位並觸發轉換
+// 從剪貼簿貼上到輸入欄位並自動轉換
 function pasteFromClipboard() {
     navigator.clipboard.readText()
         .then(text => {
