@@ -27,15 +27,16 @@
 // 將文字區塊轉換
 function convertText(text) {
     const pattern = /=+[\r\n]+([\s\S]+?)[\r\n]+(\d{4})\.(\d{2})\.(\d{2})[^\r\n]*[\r\n]+=+/g;
-    return text.replace(pattern, (match, role, y, m, d) => {
-        // 移除尾端所有空白與減號（不管中間有幾個空格或 Tab）
-        role = role.replace(/[\s\-]+$/, '');
-        role = role.trim(); // 再 trim 前後空白
+    return text.replace(pattern, (match, roleLine, y, m, d) => {
+        // 先拆行取第一行
+        let role = roleLine.split(/\r?\n/)[0];
+        // 刪掉尾端所有空白、減號和不可見字元
+        role = role.replace(/[\s\-\u200B\uFEFF]+$/u, '');
+        // 再 trim 前後空白
+        role = role.trim();
         return `Date: ${y}-${m}-${d}\nCharacter: ${role}`;
     });
 }
-
-
 
 
 // 監控 inputText 有內容就自動轉換
