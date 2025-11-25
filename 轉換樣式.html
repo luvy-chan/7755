@@ -5,78 +5,81 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>網頁樣式轉換</title>
 <style>
-  body { font-family: Arial, sans-serif; background: #f0f0f0; margin: 0; padding: 0; }
-  h1 { text-align: center; margin: 20px 0; }
+body { font-family: Arial, sans-serif; background: #f0f0f0; margin: 0; padding: 0; }
+h1 { text-align: center; margin: 20px 0; }
 
-  .wrapper {
-    display: flex;
-    justify-content: center; /* 中央對齊 */
-    gap: 20px;
-    padding: 20px;
-  }
-
-  .left {
-    width: 300px; /* 左側按鈕欄位 */
-  }
-  .left input, .left button {
-    display: block;
-    width: 100%;
-    margin-top: 10px;
-  }
-
-  
-  .right iframe {
-  width: 500px;            /* 固定寬度 */
-  height: 720px;           /* 拉長高度 */
-  border-radius: 12px;     /* 圓角 */
-  box-shadow: 2px 2px 10px rgba(0,0,0,0.2); /* 陰影 */
-  border: none;            /* 去掉原本邊框 */
+.wrapper {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding: 20px;
 }
 
-    iframe {
-    width: 100%;
-    height: 600px;
-    border: none;
-  }
-
-  /* 視窗邊緣空白 */
-  .spacer {
-    width: 20px;
-  }
-
-  /* 按鈕 */
-  .left {
+.left {
+  width: 300px;
   display: flex;
   flex-direction: column;
-  align-items: center; /* 水平置中 */
-  margin-top: 500px;   /* 下移 */
+  align-items: center;
 }
-  
-  .left input {
-  margin-bottom: 30px;   /* 上傳欄位和下載按鈕之間間距 */
+
+/* 變數輸入區 */
+.left label {
+  display: block;
+  margin-top: 10px;
+  font-size: 14px;
 }
-  
-  .left button {
-  width: 150px;           /* 減少寬度 */
-  height: 60px;           /* 加高 */
-  border-radius: 12px;    /* 圓角 */
-  background-color: #F3F3F3; /* 可愛粉色背景 */
-  color: #303030;           /* 字體顏色 */
-  border: none;           /* 去掉邊框 */
+.left input {
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-top: 3px;
+}
+
+/* 按鈕 */
+.left button {
+  width: 150px;
+  height: 50px;
+  border-radius: 12px;
+  background-color: #F3F3F3;
+  color: #303030;
+  border: none;
   cursor: pointer;
   font-weight: bold;
   font-size: 16px;
-  box-shadow: 2px 2px 6px rgba(0,0,0,0.2); /* 輕微陰影 */
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+  margin-top: 15px;
   transition: all 0.2s ease;
-  margin-top: 25px;
 }
-
 .left button:hover {
-  background-color: #D6E0F3;  /* 滑鼠移上去顏色變亮 */
+  background-color: #D6E0F3;
   color: white;
-  transform: translateY(-2px); /* 懸浮感 */
+  transform: translateY(-2px);
 }
 
+/* 拖曳區 */
+#dropZone {
+  border: 2px dashed #ccc;
+  border-radius: 12px;
+  width: 180px;
+  height: 90px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin-top: 20px;
+}
+
+/* 預覽區 */
+.right iframe {
+  width: 500px;
+  height: 720px;
+  border-radius: 12px;
+  box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+  border: none;
+}
+.spacer { width: 20px; }
 </style>
 </head>
 <body>
@@ -84,115 +87,126 @@
 
 <div class="wrapper">
   <div class="spacer"></div>
-
   <div class="left">
-  <!-- 拖曳上傳區 -->
-  <div id="dropZone" 
-     style="
-        border: 2px dashed #ccc; /* 虛線 */
-        border-radius: 12px;      /* 圓角 */ 
-        width: 180px; 
-        height: 90px; 
-        cursor: pointer; 
-        display: flex; 
-        justify-content: center;  /* 水平置中 */
-        align-items: center;      /* 垂直置中 */
-        text-align: center;
-     ">
-  拖曳檔案或點擊上傳
-</div>
+    <!-- 變數輸入區 -->
+    <label>變數1 (body background-color):<input type="text" id="var1"></label>
+    <label>變數2 (.char .msg-content background-color):<input type="text" id="var2"></label>
+    <label>變數3 (.pc .msg-content background-color):<input type="text" id="var3"></label>
+    <label>變數4 (.msg-container max-width px):<input type="text" id="var4"></label>
 
+    <!-- 操作按鈕 -->
+    <button id="restoreBtn">還原預設</button>
+    <button id="clearBtn">清空</button>
 
-  <!-- 隱藏的原始檔案選擇按鈕 -->
-  <input type="file" id="fileInput" accept=".html" multiple style="display:none;">
-
-  <!-- 下載按鈕 -->
-  <button id="downloadBtn">下載(.HTML)</button>
-</div>
-
+    <!-- 拖曳上傳區 -->
+    <div id="dropZone">拖曳檔案或點擊上傳</div>
+    <input type="file" id="fileInput" accept=".html" multiple style="display:none;">
+    <button id="downloadBtn">下載(.HTML)</button>
+  </div>
 
   <div class="right">
     <iframe id="preview"></iframe>
   </div>
-
   <div class="spacer"></div>
 </div>
 
 <script>
 let originalContent = '';
+const defaultVars = { var1:'#FFFFFF', var2:'#F9CEDC', var3:'#FFF5F8', var4:'280' };
+let userVars = JSON.parse(localStorage.getItem('userVars')) || {...defaultVars};
 
-// 上傳 HTML
+// 渲染輸入框
+function renderVars() {
+  document.getElementById('var1').value = userVars.var1 || '';
+  document.getElementById('var2').value = userVars.var2 || '';
+  document.getElementById('var3').value = userVars.var3 || '';
+  document.getElementById('var4').value = userVars.var4 || '';
+}
+renderVars();
+
+// 更新 userVars
+function updateVars() {
+  userVars.var1 = document.getElementById('var1').value.trim();
+  userVars.var2 = document.getElementById('var2').value.trim();
+  userVars.var3 = document.getElementById('var3').value.trim();
+  userVars.var4 = document.getElementById('var4').value.trim();
+  localStorage.setItem('userVars', JSON.stringify(userVars));
+  updatePreview();
+}
+
+// 即時監聽
+['var1','var2','var3','var4'].forEach(id => {
+  document.getElementById(id).addEventListener('input', updateVars);
+});
+
+// 清空
+document.getElementById('clearBtn').addEventListener('click', () => {
+  userVars = { var1:'', var2:'', var3:'', var4:'' };
+  renderVars();
+  localStorage.removeItem('userVars');
+  updatePreview();
+});
+
+// 還原
+document.getElementById('restoreBtn').addEventListener('click', () => {
+  userVars = {...defaultVars};
+  renderVars();
+  localStorage.setItem('userVars', JSON.stringify(userVars));
+  updatePreview();
+});
+
+// 上傳檔案
 function handleFiles(files) {
-  if (!files || files.length === 0) return;
-  const file = files[0]; // 只預覽第一個檔案
+  if(!files || files.length===0) return;
+  const file = files[0];
   const reader = new FileReader();
-  reader.onload = function(e){
+  reader.onload = e => {
     originalContent = e.target.result;
     updatePreview();
   };
-  reader.readAsText(file, 'UTF-8');
+  reader.readAsText(file,'UTF-8');
 }
-
-document.getElementById('fileInput').addEventListener('change', function(e){
-  handleFiles(e.target.files);
-});
-
-
-// 點擊拖曳區打開檔案選擇
-document.getElementById('dropZone').addEventListener('click', () => {
-  document.getElementById('fileInput').click();
-});
-
+document.getElementById('fileInput').addEventListener('change', e=>handleFiles(e.target.files));
+document.getElementById('dropZone').addEventListener('click', ()=>document.getElementById('fileInput').click());
 const dropZone = document.getElementById('dropZone');
+dropZone.addEventListener('dragover', e=>{e.preventDefault(); e.dataTransfer.dropEffect='copy';});
+dropZone.addEventListener('drop', e=>{e.preventDefault(); handleFiles(e.dataTransfer.files);});
 
-dropZone.addEventListener('dragover', (e) => {
-  e.preventDefault();          // 阻止預設打開檔案行為
-  e.dataTransfer.dropEffect = 'copy';
-});
-
-dropZone.addEventListener('drop', (e) => {
-  e.preventDefault();
-  handleFiles(e.dataTransfer.files); // 傳檔案給讀取函數
-});
-
-// 替換規則區
-
+// 處理替換
+function processContent(content) {
+  let result = content;
+  if(userVars.var1) result = result.replace(/body\s*{[^}]*background-color\s*:\s*[^;]+;/gi,
+    `body { font-family:'Noto Sans TC','Helvetica Neue',Arial,sans-serif;line-height:1.6;margin:0;padding:0;background-color:${userVars.var1};`);
+  if(userVars.var2) result = result.replace(/\.char\s*\.msg-content\s*{[^}]*background-color\s*:\s*[^;]+;/gi,
+    `.char .msg-content { background-color:${userVars.var2};`);
+  if(userVars.var3) result = result.replace(/\.pc\s*\.msg-content\s*{[^}]*background-color\s*:\s*[^;]+;/gi,
+    `.pc .msg-content { background-color:${userVars.var3};`);
+  if(userVars.var4) result = result.replace(/\.msg-container\s*{[^}]*max-width\s*:\s*[^;]+px/gi,
+    `.msg-container { display:flex;flex-direction:column;max-width:${userVars.var4}px`);
+  return result;
+}
 
 // 更新預覽
 function updatePreview() {
-  let content = originalContent;
-  rules.forEach(rule => {
-    const fromRegex = new RegExp(rule.from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gs');
-    content = content.replace(fromRegex, rule.to);
-  });
-  document.getElementById('preview').srcdoc = content;
+  const content = originalContent || '';
+  document.getElementById('preview').srcdoc = processContent(content);
 }
 
-// 下載 HTML
+// 下載
 document.getElementById('downloadBtn').addEventListener('click', function(){
-  let content = originalContent;
-  const rules = getDynamicRules(); // 如果有動態規則
-  rules.forEach(rule => {
-    const fromRegex = new RegExp(rule.from.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gs');
-    content = content.replace(fromRegex, rule.to);
-  });
-
-
+  const content = processContent(originalContent);
   const blob = new Blob([content], {type:'text/html;charset=utf-8'});
-  const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url;
+  a.href = URL.createObjectURL(blob);
 
-  // 取原始檔名，加上 "_C"
-  const originalName = document.getElementById('fileInput').files[0].name;
+  const file = document.getElementById('fileInput').files[0];
+  const originalName = file ? file.name : 'processed.html';
   const dotIndex = originalName.lastIndexOf('.');
-  const nameWithoutExt = dotIndex >= 0 ? originalName.slice(0, dotIndex) : originalName;
-  a.download = nameWithoutExt + '_C.html';
-
+  const nameWithoutExt = dotIndex>=0 ? originalName.slice(0,dotIndex) : originalName;
+  a.download = nameWithoutExt+'_C.html';
   a.click();
-  URL.revokeObjectURL(url);
+  URL.revokeObjectURL(a.href);
 });
-
 </script>
 </body>
 </html>
