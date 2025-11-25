@@ -321,8 +321,9 @@ dropZone.addEventListener('dragover', e=>{e.preventDefault(); e.dataTransfer.dro
 dropZone.addEventListener('drop', e=>{e.preventDefault(); handleFiles(e.dataTransfer.files);});
 
 // 處理替換
-function processContent(content) {
+function processContent(content, maxMessages = 10) {
   let result = content;
+  
   if(userVars.var1) result = result.replace(/body\s*{[^}]*background-color\s*:\s*[^;]+;/gi,
     `body { font-family:'Noto Sans TC','Helvetica Neue',Arial,sans-serif;line-height:1.6;margin:0;padding:0;background-color:${userVars.var1};`);
   if(userVars.var2) result = result.replace(/\.char\s*\.msg-content\s*{[^}]*background-color\s*:\s*[^;]+;/gi,
@@ -331,12 +332,26 @@ function processContent(content) {
     `.pc .msg-content { background-color:${userVars.var3};`);
   if(userVars.var4) result = result.replace(/\.msg-container\s*{[^}]*max-width\s*:\s*[^;]+px/gi,
     `.msg-container { display:flex;flex-direction:column;max-width:${userVars.var4}px`);
-  return result;
+  
+  // === 限制顯示對話數量 ===
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = result;
+  const messages = tempDiv.querySelectorAll('.msg-container');
+  if(messages.length > maxMessages){
+    messages.forEach((msg, index) => {
+      if(index < messages.length - maxMessages){
+        msg.remove();
+      }
+    });
+  }
+
+  return tempDiv.innerHTML;
 }
 
 // 更新預覽
 function updatePreview() {
   const content = originalContent || '';
+  const MAX_PREVIEW = 10; // 想要顯示的最後 N 條訊息
   document.getElementById('preview').srcdoc = processContent(content);
 }
 
