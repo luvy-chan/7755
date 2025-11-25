@@ -333,13 +333,13 @@ function processContent(content, maxMessages = 20) {
   if(userVars.var4) result = result.replace(/\.msg-container\s*{[^}]*max-width\s*:\s*[^;]+px/gi,
     `.msg-container { display:flex;flex-direction:column;max-width:${userVars.var4}px`);
   
-  // === 只保留前 maxMessages 條訊息 ===
+  // 只保留前 maxMessages 條訊息（包含頭像）
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = result;
-  const messages = tempDiv.querySelectorAll('.msg-container');
+  const messages = tempDiv.querySelectorAll('.char, .pc'); // 整個訊息容器
   messages.forEach((msg, index) => {
     if(index >= maxMessages){
-      msg.remove(); // 超過前 10 條就刪掉
+      msg.remove();
     }
   });
 
