@@ -40,23 +40,32 @@
     width: 20px;
   }
 
-  /* 按鈕樣式 */
+  /* 按鈕 */
+  .left {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* 水平置中 */
+  margin-top: 10px;   /* 下移 10px */
+}
+  
   .left button {
   width: 100px;           /* 減少寬度 */
   height: 45px;           /* 加高 */
   border-radius: 12px;    /* 圓角 */
   background-color: #F3F3F3; /* 可愛粉色背景 */
-  color: white;           /* 字體顏色 */
+  color: black;           /* 字體顏色 */
   border: none;           /* 去掉邊框 */
   cursor: pointer;
   font-weight: bold;
   font-size: 16px;
   box-shadow: 2px 2px 6px rgba(0,0,0,0.2); /* 輕微陰影 */
   transition: all 0.2s ease;
+  margin-top: 10px;
 }
 
 .left button:hover {
-  background-color: #ff96b0;  /* 滑鼠移上去顏色變亮 */
+  background-color: #D6E0F3;  /* 滑鼠移上去顏色變亮 */
+  color: white;
   transform: translateY(-2px); /* 懸浮感 */
 }
 
