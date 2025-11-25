@@ -185,10 +185,11 @@ function updatePreview() {
 // 下載 HTML
 document.getElementById('downloadBtn').addEventListener('click', function(){
   let content = originalContent;
+  const rules = getDynamicRules(); // 如果有動態規則
   rules.forEach(rule => {
-  const fromRegex = new RegExp(rule.from.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gs');
-  content = content.replace(fromRegex, rule.to);
-});
+    const fromRegex = new RegExp(rule.from.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gs');
+    content = content.replace(fromRegex, rule.to);
+  });
 
 
   const blob = new Blob([content], {type:'text/html;charset=utf-8'});
