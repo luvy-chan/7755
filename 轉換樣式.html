@@ -251,21 +251,25 @@ function updatePreview() {
   document.getElementById('preview').srcdoc = processContent(content);
 }
 
-// 下載
+// 下載 HTML
 document.getElementById('downloadBtn').addEventListener('click', function(){
-  const content = processContent(originalContent);
+  const content = processContent(originalContent); // 保留原本變數替換功能
   const blob = new Blob([content], {type:'text/html;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
+  a.href = url;
 
+  // 取原始檔名，加上 "_C"
   const file = document.getElementById('fileInput').files[0];
   const originalName = file ? file.name : 'processed.html';
   const dotIndex = originalName.lastIndexOf('.');
-  const nameWithoutExt = dotIndex>=0 ? originalName.slice(0,dotIndex) : originalName;
-  a.download = nameWithoutExt+'_C.html';
+  const nameWithoutExt = dotIndex >= 0 ? originalName.slice(0, dotIndex) : originalName;
+  a.download = nameWithoutExt + '_C.html';
+
   a.click();
-  URL.revokeObjectURL(a.href);
+  URL.revokeObjectURL(url);
 });
+
 </script>
 </body>
 </html>
