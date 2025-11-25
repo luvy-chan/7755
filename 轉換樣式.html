@@ -24,22 +24,30 @@ h1 { text-align: center; margin: 20px 0; }
 
 /* 變數輸入區 */
 .left label {
-  display: block;
-  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 15px;
   font-size: 14px;
 }
-.left input {
-  width: 100%;
+.left label input {
+  width: 200px;
   padding: 6px 8px;
   border-radius: 8px;
   border: 1px solid #ccc;
-  margin-top: 3px;
+  margin-top: 5px;
 }
 
-/* 按鈕 */
-.left button {
-  width: 150px;
-  height: 50px;
+/* 清空 & 還原按鈕並排 */
+.btn-group {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+.btn-group button {
+  width: 120px;
+  height: 45px;
   border-radius: 12px;
   background-color: #F3F3F3;
   color: #303030;
@@ -48,16 +56,22 @@ h1 { text-align: center; margin: 20px 0; }
   font-weight: bold;
   font-size: 16px;
   box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
-  margin-top: 15px;
   transition: all 0.2s ease;
 }
-.left button:hover {
+.btn-group button:hover {
   background-color: #D6E0F3;
   color: white;
   transform: translateY(-2px);
 }
 
-/* 拖曳區 */
+/* 拖曳區 + 下載按鈕底部 */
+.bottom-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 40px;
+  gap: 15px;
+}
 #dropZone {
   border: 2px dashed #ccc;
   border-radius: 12px;
@@ -68,7 +82,6 @@ h1 { text-align: center; margin: 20px 0; }
   justify-content: center;
   align-items: center;
   text-align: center;
-  margin-top: 20px;
 }
 
 /* 預覽區 */
@@ -79,6 +92,7 @@ h1 { text-align: center; margin: 20px 0; }
   box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
   border: none;
 }
+
 .spacer { width: 20px; }
 </style>
 </head>
@@ -88,20 +102,34 @@ h1 { text-align: center; margin: 20px 0; }
 <div class="wrapper">
   <div class="spacer"></div>
   <div class="left">
+
     <!-- 變數輸入區 -->
-    <label>變數1 (body background-color):<input type="text" id="var1"></label>
-    <label>變數2 (.char .msg-content background-color):<input type="text" id="var2"></label>
-    <label>變數3 (.pc .msg-content background-color):<input type="text" id="var3"></label>
-    <label>變數4 (.msg-container max-width px):<input type="text" id="var4"></label>
+<label>網頁背景色
+  <input type="text" id="var1" placeholder="#FFF5F8">
+</label>
+<label>角色對話色
+  <input type="text" id="var2" placeholder="#FFFFFF">
+</label>
+<label>玩家對話色
+  <input type="text" id="var3" placeholder="#F9CEDC">
+</label>
+<label>對話寬(px)
+  <input type="text" id="var4" placeholder="280">
+</label>
 
-    <!-- 操作按鈕 -->
-    <button id="restoreBtn">還原預設</button>
-    <button id="clearBtn">清空</button>
 
-    <!-- 拖曳上傳區 -->
-    <div id="dropZone">拖曳檔案或點擊上傳</div>
+    <!-- 清空 & 還原按鈕 -->
+    <div class="btn-group">
+      <button id="restoreBtn">還原預設</button>
+      <button id="clearBtn">清空</button>
+    </div>
+
+    <!-- 拖曳上傳 + 下載按鈕 -->
+    <div class="bottom-actions">
+      <div id="dropZone">拖曳檔案或點擊上傳</div>
+      <button id="downloadBtn">下載(.HTML)</button>
+    </div>
     <input type="file" id="fileInput" accept=".html" multiple style="display:none;">
-    <button id="downloadBtn">下載(.HTML)</button>
   </div>
 
   <div class="right">
@@ -112,7 +140,7 @@ h1 { text-align: center; margin: 20px 0; }
 
 <script>
 let originalContent = '';
-const defaultVars = { var1:'#FFFFFF', var2:'#F9CEDC', var3:'#FFF5F8', var4:'280' };
+const defaultVars = { var1:'#FFF5F8', var2:'#FFFFFF', var3:'#F9CEDC', var4:'280' };
 let userVars = JSON.parse(localStorage.getItem('userVars')) || {...defaultVars};
 
 // 渲染輸入框
