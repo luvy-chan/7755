@@ -120,7 +120,8 @@ function transformText(text) {
   text = text.replace(/「([^」]+)」@#%/g, "@#%「$1」@#%");
   text = text.replace(/：「([^」]+)」/g, "：*「$1」*");
   text = text.replace(/@#%@#%/g, "");
-  text = text.replace(/@#% @#%/g, "");
+  text = text.replace(/@#% /g, " ");
+  text = text.replace(/ @#%/g, " ");
   text = text.replace(/@#%/g, "*");
   text = text.replace(/」\*(\n|$)/g, "」$1");
   return text;
