@@ -114,32 +114,16 @@ label { font-weight: bold; color: #555; }
 let latestOutput = "";
 
 function transformText(text) {
-
-  // 先把每一行取出來（不破壞原本處理方式）
-  const lines = text.split(/\r?\n/);
-
-  const processed = lines.map(line => {
-
-    // 空白行（只含空白/空格/Tab）→ 不做任何處理
-    if (!line.trim()) return "";
-
-    // ② 套回你的原本處理邏輯（逐行處理）
-    let t = line;
-
-    t = t.replace(/(^|\n)/g, "$1@#%");
-    t = t.replace(/(\n|$)/g, "@#%$1");
-    t = t.replace(/@#%「([^」]+)」/g, "@#%「$1」@#%");
-    t = t.replace(/「([^」]+)」@#%/g, "@#%「$1」@#%");
-    t = t.replace(/：「([^」]+)」/g, "：*「$1」*");
-    t = t.replace(/@#%@#%/g, "");
-    t = t.replace(/@#%/g, "*");
-    t = t.replace(/」\*(\n|$)/g, "」$1");
-
-    return t;
-  });
-
-  // 合併回去（保留原始的空白行結構）
-  return processed.join("\n");
+  text = text.replace(/(^|\n)/g, "$1@#%");
+  text = text.replace(/(\n|$)/g, "@#%$1");
+  text = text.replace(/@#%「([^」]+)」/g, "@#%「$1」@#%");
+  text = text.replace(/「([^」]+)」@#%/g, "@#%「$1」@#%");
+  text = text.replace(/：「([^」]+)」/g, "：*「$1」*");
+  text = text.replace(/@#%@#%/g, "");
+  text = text.replace(/@#% @#%/g, " ");
+  text = text.replace(/@#%/g, "*");
+  text = text.replace(/」\*(\n|$)/g, "」$1");
+  return text;
 }
 
 
