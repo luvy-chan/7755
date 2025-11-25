@@ -321,7 +321,7 @@ dropZone.addEventListener('dragover', e=>{e.preventDefault(); e.dataTransfer.dro
 dropZone.addEventListener('drop', e=>{e.preventDefault(); handleFiles(e.dataTransfer.files);});
 
 // 處理替換
-function processContent(content, maxMessages = 10) {
+function processContent(content, maxMessages = 20) {
   let result = content;
   
   if(userVars.var1) result = result.replace(/body\s*{[^}]*background-color\s*:\s*[^;]+;/gi,
@@ -333,17 +333,15 @@ function processContent(content, maxMessages = 10) {
   if(userVars.var4) result = result.replace(/\.msg-container\s*{[^}]*max-width\s*:\s*[^;]+px/gi,
     `.msg-container { display:flex;flex-direction:column;max-width:${userVars.var4}px`);
   
-  // === 限制顯示對話數量 ===
+  // === 只保留前 maxMessages 條訊息 ===
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = result;
   const messages = tempDiv.querySelectorAll('.msg-container');
-  if(messages.length > maxMessages){
-    messages.forEach((msg, index) => {
-      if(index < messages.length - maxMessages){
-        msg.remove();
-      }
-    });
-  }
+  messages.forEach((msg, index) => {
+    if(index >= maxMessages){
+      msg.remove(); // 超過前 10 條就刪掉
+    }
+  });
 
   return tempDiv.innerHTML;
 }
@@ -351,7 +349,7 @@ function processContent(content, maxMessages = 10) {
 // 更新預覽
 function updatePreview() {
   const content = originalContent || '';
-  const MAX_PREVIEW = 10; // 想要顯示的最後 N 條訊息
+  const MAX_PREVIEW = 20; // 想要顯示的最後 N 條訊息
   document.getElementById('preview').srcdoc = processContent(content);
 }
 
