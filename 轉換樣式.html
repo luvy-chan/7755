@@ -125,9 +125,75 @@ h1 { text-align: center; margin: 20px 0; }
 }
 
 .spacer { width: 20px; }
+
+/* === 手機版側邊欄模式 === */
+@media (max-width: 768px) {
+
+  .wrapper {
+    flex-direction: column;
+    padding: 0;
+    gap: 0;
+  }
+
+  /* 手機版：預覽 iframe 全寬 */
+  .right iframe {
+    width: 100vw;
+    height: calc(100vh - 50px);
+    border-radius: 0;
+  }
+
+  /* 手機版：左側變成側邊滑出式 */
+  .left {
+    position: fixed;
+    top: 0;
+    left: -300px;             /* 初始隱藏 */
+    width: 260px;
+    height: 100vh;
+    background: #fff;
+    z-index: 2000;
+    box-shadow: 3px 0 8px rgba(0,0,0,0.3);
+    transition: left 0.3s ease;
+    padding-top: 70px;        /* 留空間給上方按鈕 */
+  }
+
+  /* 左欄啟動（滑出） */
+  .left.active {
+    left: 0;
+  }
+
+  /* 隱藏 spacer */
+  .spacer { display: none; }
+
+  /* 手機版顯示「功能選單」按鈕 */
+  #menuToggle {
+    display: block;
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 3000;
+    background: #F3F3F3;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 18px;
+    box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+  }
+
+  h1 {
+    margin-top: 60px;
+  }
+}
+
+/* 桌面版隱藏按鈕 */
+#menuToggle {
+  display: none;
+}
+
+  
 </style>
 </head>
 <body>
+<button id="menuToggle">☰樣式</button>
 <h1>網頁樣式轉換</h1>
 
 <div class="wrapper">
@@ -275,6 +341,15 @@ document.getElementById('downloadBtn').addEventListener('click', function(){
   URL.revokeObjectURL(url);
 });
 
+// 手機版 左側滑出功能
+const menuBtn = document.getElementById('menuToggle');
+const leftPanel = document.querySelector('.left');
+
+menuBtn.addEventListener('click', () => {
+  leftPanel.classList.toggle('active');
+});
+
+  
 </script>
 </body>
 </html>
