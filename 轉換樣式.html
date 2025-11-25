@@ -64,14 +64,25 @@ h1 { text-align: center; margin: 20px 0; }
   transform: translateY(-2px);
 }
 
-/* 拖曳區 + 下載按鈕底部 */
+.left {
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative; /* 讓底部按鈕絕對定位相對於這個容器 */
+  height: 720px;      /* 可依右側 iframe 高度設定 */
+}
+
+/* 拖曳區 + 下載按鈕固定底部 */
 .bottom-actions {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 40px;
   gap: 15px;
+  position: absolute;
+  bottom: 20px; /* 距離容器底部 20px */
 }
+
 #dropZone {
   border: 2px dashed #ccc;
   border-radius: 12px;
@@ -84,24 +95,8 @@ h1 { text-align: center; margin: 20px 0; }
   text-align: center;
 }
 
-.left {
-  width: 300px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  height: 100%; /* 加上高度，讓 flex 作用 */
-}
-
-.bottom-actions {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 15px;
-  margin-top: auto; /* 推到底部 */
-}
-
 .bottom-actions button {
-  width: 150px;          /* 與上方按鈕一致 */
+  width: 150px;          
   height: 50px;
   border-radius: 12px;
   background-color: #F3F3F3;
@@ -118,6 +113,7 @@ h1 { text-align: center; margin: 20px 0; }
   color: white;
   transform: translateY(-2px);
 }
+
 
 /* 預覽區 */
 .right iframe {
