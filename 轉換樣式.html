@@ -173,6 +173,8 @@ h1 { text-align: center; margin: 20px 0; }
 let originalContent = '';
 const defaultVars = { var1:'#FFF5F8', var2:'#FFFFFF', var3:'#F9CEDC', var4:'280' };
 let userVars = JSON.parse(localStorage.getItem('userVars')) || {...defaultVars};
+let currentFile = null; // 儲存目前上傳的檔案，點擊或拖曳都用它
+
 
 // 渲染輸入框
 function renderVars() {
@@ -216,8 +218,10 @@ document.getElementById('restoreBtn').addEventListener('click', () => {
 
 // 上傳檔案
 function handleFiles(files) {
-  if(!files || files.length===0) return;
+  if(!files || files.length === 0) return;
   const file = files[0];
+  currentFile = file; // 儲存檔案
+
   const reader = new FileReader();
   reader.onload = e => {
     originalContent = e.target.result;
@@ -225,6 +229,7 @@ function handleFiles(files) {
   };
   reader.readAsText(file,'UTF-8');
 }
+
 document.getElementById('fileInput').addEventListener('change', e=>handleFiles(e.target.files));
 document.getElementById('dropZone').addEventListener('click', ()=>document.getElementById('fileInput').click());
 const dropZone = document.getElementById('dropZone');
@@ -260,8 +265,7 @@ document.getElementById('downloadBtn').addEventListener('click', function(){
   a.href = url;
 
   // 取原始檔名，加上 "_C"
-  const file = document.getElementById('fileInput').files[0];
-  const originalName = file ? file.name : 'processed.html';
+  const originalName = currentFile ? currentFile.name : 'processed.html';
   const dotIndex = originalName.lastIndexOf('.');
   const nameWithoutExt = dotIndex >= 0 ? originalName.slice(0, dotIndex) : originalName;
   a.download = nameWithoutExt + '_C.html';
