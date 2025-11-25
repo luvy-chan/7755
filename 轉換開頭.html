@@ -28,15 +28,14 @@
 function convertText(text) {
     const pattern = /=+[\r\n]+([\s\S]+?)[\r\n]+(\d{4})\.(\d{2})\.(\d{2})[^\r\n]*[\r\n]+=+/g;
     return text.replace(pattern, (match, roleLine, y, m, d) => {
-        // 先拆行取第一行
-        let role = roleLine.split(/\r?\n/)[0];
-        // 刪掉尾端所有空白、減號和不可見字元
-        role = role.replace(/[\s\-\u200B\uFEFF]+$/u, '');
-        // 再 trim 前後空白
-        role = role.trim();
+        // 先取第一行
+        let role = roleLine.split(/\r?\n/)[0].trim();
+        // 只保留空白前的部分作為角色名字
+        role = role.split(/\s/)[0];
         return `Date: ${y}-${m}-${d}\nCharacter: ${role}`;
     });
 }
+
 
 
 // 監控 inputText 有內容就自動轉換
