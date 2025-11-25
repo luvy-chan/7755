@@ -26,13 +26,18 @@
 <script>
 // 將文字區塊轉換
 function convertText(text) {
-    // 正則：支援 \n 或 \r\n 換行，角色名字尾端 - 可有可無
+    // 支援 \n 或 \r\n 換行，角色名字尾端 - 可有可無
     const pattern = /=+[\r\n]+([\s\S]+?)\s*-?\s*[\r\n]+(\d{4})\.(\d{2})\.(\d{2})[^\r\n]*[\r\n]+=+/g;
     return text.replace(pattern, (match, role, y, m, d) => {
+        // 去掉尾端的空白跟 -
         role = role.trim();
+        if (role.endsWith('-')) {
+            role = role.slice(0, -1).trim();
+        }
         return `Date: ${y}-${m}-${d}\nCharacter: ${role}`;
     });
 }
+
 
 // 監控 inputText 有內容就自動轉換
 document.getElementById('inputText').addEventListener('input', () => {
