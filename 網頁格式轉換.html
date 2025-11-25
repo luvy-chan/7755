@@ -122,15 +122,37 @@
 let originalContent = '';
 
 // 上傳 HTML
-document.getElementById('fileInput').addEventListener('change', function(e){
-  const file = e.target.files[0];
-  if(!file) return;
+function handleFiles(files) {
+  if (!files || files.length === 0) return;
+  const file = files[0]; // 只預覽第一個檔案
   const reader = new FileReader();
   reader.onload = function(e){
     originalContent = e.target.result;
     updatePreview();
   };
   reader.readAsText(file, 'UTF-8');
+}
+
+document.getElementById('fileInput').addEventListener('change', function(e){
+  handleFiles(e.target.files);
+});
+
+
+// 點擊拖曳區打開檔案選擇
+document.getElementById('dropZone').addEventListener('click', () => {
+  document.getElementById('fileInput').click();
+});
+
+const dropZone = document.getElementById('dropZone');
+
+dropZone.addEventListener('dragover', (e) => {
+  e.preventDefault();          // 阻止預設打開檔案行為
+  e.dataTransfer.dropEffect = 'copy';
+});
+
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  handleFiles(e.dataTransfer.files); // 傳檔案給讀取函數
 });
 
 // 替換規則
@@ -163,11 +185,11 @@ function updatePreview() {
 // 下載 HTML
 document.getElementById('downloadBtn').addEventListener('click', function(){
   let content = originalContent;
-  const rules = getDynamicRules(); // 如果有動態規則
   rules.forEach(rule => {
-    const fromRegex = new RegExp(rule.from.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gs');
-    content = content.replace(fromRegex, rule.to);
-  });
+  const fromRegex = new RegExp(rule.from.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gs');
+  content = content.replace(fromRegex, rule.to);
+});
+
 
   const blob = new Blob([content], {type:'text/html;charset=utf-8'});
   const url = URL.createObjectURL(blob);
