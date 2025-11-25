@@ -25,10 +25,9 @@
   }
 
   .right {
-    flex: 1; /* 右側預覽欄位自適應 */
-    min-width: 400px; /* 最小寬度避免太窄 */
+    width: 500px; /* 固定預覽欄位 */
     border: 1px solid #ccc;
-  }
+}
 
   iframe {
     width: 100%;
@@ -40,6 +39,27 @@
   .spacer {
     width: 20px;
   }
+
+  /* 按鈕樣式 */
+  .left button {
+  width: 100px;           /* 減少寬度 */
+  height: 45px;           /* 加高 */
+  border-radius: 12px;    /* 圓角 */
+  background-color: #F3F3F3; /* 可愛粉色背景 */
+  color: white;           /* 字體顏色 */
+  border: none;           /* 去掉邊框 */
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.2); /* 輕微陰影 */
+  transition: all 0.2s ease;
+}
+
+.left button:hover {
+  background-color: #ff96b0;  /* 滑鼠移上去顏色變亮 */
+  transform: translateY(-2px); /* 懸浮感 */
+}
+
 </style>
 </head>
 <body>
