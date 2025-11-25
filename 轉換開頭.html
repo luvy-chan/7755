@@ -28,12 +28,12 @@
 function convertText(text) {
     const pattern = /=+[\r\n]+([\s\S]+?)[\r\n]+(\d{4})\.(\d{2})\.(\d{2})[^\r\n]*[\r\n]+=+/g;
     return text.replace(pattern, (match, role, y, m, d) => {
-        // 去掉角色名字尾端固定的 " - "
-        role = role.replace(/\s-\s*$/, ''); 
-        role = role.trim(); // 確保沒有多餘空白
+        // 直接把固定字串 " - " 替換掉
+        role = role.replace(' - ', '').trim();
         return `Date: ${y}-${m}-${d}\nCharacter: ${role}`;
     });
 }
+
 
 
 // 監控 inputText 有內容就自動轉換
