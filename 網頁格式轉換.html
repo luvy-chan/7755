@@ -49,7 +49,7 @@
   display: flex;
   flex-direction: column;
   align-items: center; /* 水平置中 */
-  margin-top: 600px;   /* 下移 */
+  margin-top: 550px;   /* 下移 */
 }
   
   .left input {
@@ -142,18 +142,27 @@ function updatePreview() {
 // 下載 HTML
 document.getElementById('downloadBtn').addEventListener('click', function(){
   let content = originalContent;
+  const rules = getDynamicRules(); // 如果有動態規則
   rules.forEach(rule => {
-    const fromRegex = new RegExp(rule.from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gs');
+    const fromRegex = new RegExp(rule.from.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gs');
     content = content.replace(fromRegex, rule.to);
   });
-  const blob = new Blob([content], {type: 'text/html;charset=utf-8'});
+
+  const blob = new Blob([content], {type:'text/html;charset=utf-8'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'processed.html';
+
+  // 取原始檔名，加上 "_C"
+  const originalName = document.getElementById('fileInput').files[0].name;
+  const dotIndex = originalName.lastIndexOf('.');
+  const nameWithoutExt = dotIndex >= 0 ? originalName.slice(0, dotIndex) : originalName;
+  a.download = nameWithoutExt + '_C.html';
+
   a.click();
   URL.revokeObjectURL(url);
 });
+
 </script>
 </body>
 </html>
