@@ -20,6 +20,8 @@ h1 { text-align: center; margin: 20px 0; }
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative; /* 讓底部按鈕絕對定位相對於這個容器 */
+  height: 720px;      /* 可依右側 iframe 高度設定 */
 }
 
 /* 變數輸入區 */
@@ -64,14 +66,7 @@ h1 { text-align: center; margin: 20px 0; }
   transform: translateY(-2px);
 }
 
-.left {
-  width: 300px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative; /* 讓底部按鈕絕對定位相對於這個容器 */
-  height: 720px;      /* 可依右側 iframe 高度設定 */
-}
+
 
 /* 拖曳區 + 下載按鈕固定底部 */
 .bottom-actions {
@@ -126,8 +121,8 @@ h1 { text-align: center; margin: 20px 0; }
 
 .spacer { width: 20px; }
 
-/* === 手機版側邊欄模式 === */
-@media (max-width: 768px) {
+/* === 手機版（真正手機裝置用） === */
+@media (max-width: 1024px) {
 
   .wrapper {
     flex-direction: column;
@@ -135,66 +130,78 @@ h1 { text-align: center; margin: 20px 0; }
     gap: 0;
   }
 
-  /* 手機版：預覽 iframe 全寬 */
+  /* 讓預覽 iframe 填滿螢幕寬度 */
   .right iframe {
     width: 100vw;
-    height: calc(100vh - 50px);
+    height: calc(100vh - 60px);
     border-radius: 0;
   }
 
-  /* 手機版：左側變成側邊滑出式 */
+  /* 左側變成側邊欄 */
   .left {
     position: fixed;
     top: 0;
-    left: -300px;             /* 初始隱藏 */
+    left: -280px; /* 初始隱藏 */
     width: 260px;
     height: 100vh;
+    overflow-y: auto; /* 防止內容太高 */
     background: #fff;
     z-index: 2000;
-    box-shadow: 3px 0 8px rgba(0,0,0,0.3);
+    box-shadow: 3px 0 8px rgba(0,0,0,0.25);
     transition: left 0.3s ease;
-    padding-top: 70px;        /* 留空間給上方按鈕 */
+    padding-top: 70px;
   }
 
-  /* 左欄啟動（滑出） */
+  /* 左欄展開 */
   .left.active {
     left: 0;
   }
 
-  /* 隱藏 spacer */
   .spacer { display: none; }
 
-  /* 手機版顯示「功能選單」按鈕 */
+  /* 手機按鈕 */
   #menuToggle {
     display: block;
     position: fixed;
-    top: 10px;
-    left: 10px;
+    top: 12px;
+    left: 12px;
     z-index: 3000;
     background: #F3F3F3;
     border: none;
     border-radius: 10px;
-    padding: 10px 14px;
+    padding: 10px 15px;
     font-size: 18px;
-    box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+    box-shadow: 2px 2px 6px rgba(0,0,0,0.25);
   }
 
   h1 {
-    margin-top: 60px;
+    margin-top: 70px;
   }
 }
 
-/* 桌面版隱藏按鈕 */
+/* 桌面版：按鈕隱藏 */
 #menuToggle {
   display: none;
 }
 
+#overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.45);
+  z-index: 1500;
+}
   
 </style>
 </head>
 <body>
 <button id="menuToggle">☰樣式</button>
 <h1>網頁樣式轉換</h1>
+
+<div id="overlay"></div>
 
 <div class="wrapper">
   <div class="spacer"></div>
@@ -347,6 +354,20 @@ const leftPanel = document.querySelector('.left');
 
 menuBtn.addEventListener('click', () => {
   leftPanel.classList.toggle('active');
+});
+
+// 點背景 → 關閉側欄
+const overlay = document.getElementById('overlay');
+
+menuBtn.addEventListener('click', () => {
+  leftPanel.classList.toggle('active');
+  overlay.style.display = leftPanel.classList.contains('active') ? 'block' : 'none';
+});
+
+// 點遮罩關閉
+overlay.addEventListener('click', () => {
+  leftPanel.classList.remove('active');
+  overlay.style.display = 'none';
 });
 
   
