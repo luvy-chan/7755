@@ -86,9 +86,19 @@
   <div class="spacer"></div>
 
   <div class="left">
-    <input type="file" id="fileInput" accept=".html">
-    <button id="downloadBtn">下載處理後 HTML</button>
+  <!-- 拖曳上傳區 -->
+  <div id="dropZone" 
+       style="border: 2px dashed #ccc; padding: 20px; text-align: center; cursor: pointer;">
+    拖曳檔案或點擊上傳
   </div>
+
+  <!-- 隱藏的原始檔案選擇按鈕 -->
+  <input type="file" id="fileInput" accept=".html" multiple style="display:none;">
+
+  <!-- 下載按鈕 -->
+  <button id="downloadBtn">下載(.HTML)</button>
+</div>
+
 
   <div class="right">
     <iframe id="preview"></iframe>
