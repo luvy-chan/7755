@@ -5,26 +5,59 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>網頁格式轉換</title>
 <style>
-  body { font-family: Arial, sans-serif; padding: 20px; background: #f0f0f0; }
-  h1 { margin-bottom: 20px; }
-  .container { display: flex; gap: 20px; }
-  .left { width: 300px; }
-  .left input, .left button { display: block; margin-top: 10px; width: 100%; }
-  .right { flex: 1; border: 1px solid #ccc; }
-  iframe { width: 100%; height: 600px; border: none; }
+  body { font-family: Arial, sans-serif; background: #f0f0f0; margin: 0; padding: 0; }
+  h1 { text-align: center; margin: 20px 0; }
+
+  .wrapper {
+    display: flex;
+    justify-content: center; /* 中央對齊 */
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .left {
+    width: 300px; /* 左側按鈕欄位 */
+  }
+  .left input, .left button {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .right {
+    flex: 1; /* 右側預覽欄位自適應 */
+    min-width: 400px; /* 最小寬度避免太窄 */
+    border: 1px solid #ccc;
+  }
+
+  iframe {
+    width: 100%;
+    height: 600px;
+    border: none;
+  }
+
+  /* 視窗邊緣空白 */
+  .spacer {
+    width: 20px;
+  }
 </style>
 </head>
 <body>
 <h1>網頁格式轉換</h1>
 
-<div class="container">
+<div class="wrapper">
+  <div class="spacer"></div>
+
   <div class="left">
     <input type="file" id="fileInput" accept=".html">
     <button id="downloadBtn">下載處理後 HTML</button>
   </div>
+
   <div class="right">
     <iframe id="preview"></iframe>
   </div>
+
+  <div class="spacer"></div>
 </div>
 
 <script>
@@ -54,9 +87,9 @@ const rules = [
   {from: `.character-name{ font-size:14px`, to: `.character-name{ font-size:15px`},
   {from: `16px;font-size:15px`, to: `16px;font-size:16px`},
   {from: `body{ font-family:`, to: `body { font-weight: 400;font-family:`},
-  {from: `  </style>`, to: `@media (min-width: 600px) {\n  .pc .msg-content {\n    margin-right: 20px; /* 控制氣泡離右側距離 */\n  }\n}\n  </style>`},
+  {from: `  </style>`, to: `@media (min-width: 600px) {\n  .pc .msg-content {\n    margin-right: 20px;\n  }\n}\n  </style>`},
   {from: `.ava-pc {\n      background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjZTBlMGUwIiBkPSJNMjU2IDUxMmMxNDEuNCAwIDI1Ni0xMTQuNiAyNTYtMjU2UzM5Ny40IDAgMjU2IDBTMCAxMTQuNiAwIDI1NnMxMTQuNiAyNTYgMjU2IDI1NnoiLz48cGF0aCBmaWxsPSIjYWFhIiBkPSJNMjU2IDI4OGMtNTMgMC05Ni00My05Ni05NnM0My05NiA5Ni05NnM5NiA0MyA5NiA5Ni00MyA5Ni05NiA5NnptMCAxMjhjLTEwNSAwLTE5Mi03MS0xOTItMTU5LjggMC0zMC4yIDEwLjgtNTguNyAzMC40LTgxLjZDMTI2LjIgMTM3LjE4IDE4Ny44IDExMiAyNTYgMTEyczEyOS44IDI1LjE4IDE2MS42IDYyLjZjMTkuNiAyMi45IDMwLjQgNTEuNCAzMC40IDgxLjZDNDQ4IDM0NSAzNjEgNDE2IDI1NiA0MTZ6Ii8+PC9zdmc+');`, to: `.ava-pc {\n       display: none;`},
-  {from: `@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500&display=swap');`, to: `@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');\n      \n    html {\n      text-size-adjust: 100%;\n      -webkit-text-size-adjust: 100%;\n    }\n    `}
+  {from: `@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500&display=swap');`, to: `@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');\n    html {\n      text-size-adjust: 100%;\n      -webkit-text-size-adjust: 100%;\n    }\n    `}
 ];
 
 // 更新預覽
@@ -66,11 +99,10 @@ function updatePreview() {
     const fromRegex = new RegExp(rule.from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gs');
     content = content.replace(fromRegex, rule.to);
   });
-  const iframe = document.getElementById('preview');
-  iframe.srcdoc = content;
+  document.getElementById('preview').srcdoc = content;
 }
 
-// 下載處理後 HTML
+// 下載 HTML
 document.getElementById('downloadBtn').addEventListener('click', function(){
   let content = originalContent;
   rules.forEach(rule => {
