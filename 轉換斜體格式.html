@@ -114,6 +114,7 @@ label { font-weight: bold; color: #555; }
 let latestOutput = "";
 
 function transformText(text) {
+  if (!text.trim()) return "";
   text = text.replace(/(^|\n)/g, "$1@#%");
   text = text.replace(/(\n|$)/g, "@#%$1");
   text = text.replace(/@#%「([^」]+)」/g, "@#%「$1」@#%");
