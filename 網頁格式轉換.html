@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>網頁格式轉換</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; background: #f0f0f0; }
+  textarea { width: 100%; height: 150px; margin-top: 10px; }
+  input, button { margin-top: 10px; }
+</style>
+</head>
+<body>
+<h1>網頁格式轉換</h1>
+
+<input type="file" id="fileInput" accept=".html"><br>
+
+<h3>處理後的 HTML</h3>
+<textarea id="output" readonly></textarea><br>
+
+<button id="processBtn">處理 HTML</button>
+<button id="downloadBtn">下載處理後 HTML</button>
+
+<script>
+let originalContent = '';
+
+// 上傳 HTML
+document.getElementById('fileInput').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    originalContent = e.target.result;
+    document.getElementById('output').value = originalContent;
+  };
+  reader.readAsText(file, 'UTF-8');
+});
+
+// 替換規則
+const rules = [
+  // 1. 刪除
+  {from: `<div class="msg-timestamp">00:00</div>`, to: ``},
+
+  // 2. 單行替換
+  {from: `#FFFFFF`, to: `#FAFAFA`},
+  {from: `#F9CEDC`, to: `#D6E0F3`},
+  {from: `#FFF5F8`, to: `#EEEFF2`},
+  {from: `max-width:280px`, to: `max-width:325px`},
+  {from: `margin-right:10px`, to: `margin-right:0`},
+  {from: `<meta name="viewport" content="width=device-width, initial-scale=1.0">`, to: `<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">`},
+  {from: `.character-name{ font-size:14px`, to: `.character-name{ font-size:15px`},
+  {from: `16px;font-size:15px`, to: `16px;font-size:16px`},
+  {from: `body{ font-family:`, to: `body { font-weight: 400;font-family:`},
+
+  // 4. 多行替換之一
+  {from: `  </style>`, to: `@media (min-width: 600px) {\n  .pc .msg-content {\n    margin-right: 20px; /* 控制氣泡離右側距離 */\n  }\n}\n  </style>`},
+
+  // 5. 多行替換之二
+  {from: `.ava-pc {\n      background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjZTBlMGUwIiBkPSJNMjU2IDUxMmMxNDEuNCAwIDI1Ni0xMTQuNiAyNTYtMjU2UzM5Ny40IDAgMjU2IDBTMCAxMTQuNiAwIDI1NnMxMTQuNiAyNTYgMjU2IDI1NnoiLz48cGF0aCBmaWxsPSIjYWFhIiBkPSJNMjU2IDI4OGMtNTMgMC05Ni00My05Ni05NnM0My05NiA5Ni05NnM5NiA0MyA5NiA5Ni00MyA5Ni05NiA5NnptMCAxMjhjLTEwNSAwLTE5Mi03MS0xOTItMTU5LjggMC0zMC4yIDEwLjgtNTguNyAzMC40LTgxLjZDMTI2LjIgMTM3LjE4IDE4Ny44IDExMiAyNTYgMTEyczEyOS44IDI1LjE4IDE2MS42IDYyLjZjMTkuNiAyMi45IDMwLjQgNTEuNCAzMC40IDgxLjZDNDQ4IDM0NSAzNjEgNDE2IDI1NiA0MTZ6Ii8+PC9zdmc+');`, to: `.ava-pc {\n       display: none;`},
+
+  // 6. 多行替換之三
+  {from: `@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500&display=swap');`, to: `@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');\n      \n    html {\n      text-size-adjust: 100%;\n      -webkit-text-size-adjust: 100%;\n    }\n    `}
+];
+
+// 處理 HTML
+document.getElementById('processBtn').addEventListener('click', function(){
+  let content = originalContent;
+
+  rules.forEach(rule => {
+    // 使用全局替換，支援多行
+    const fromRegex = new RegExp(rule.from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gs');
+    content = content.replace(fromRegex, rule.to);
+  });
+
+  document.getElementById('output').value = content;
+});
+
+// 下載 HTML
+document.getElementById('downloadBtn').addEventListener('click', function(){
+  const blob = new Blob([document.getElementById('output').value], {type: 'text/html;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'processed.html';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+</script>
+</body>
+</html>
