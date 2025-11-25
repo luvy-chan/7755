@@ -115,6 +115,10 @@ let latestOutput = "";
 
 function transformText(text) {
   if (!text.trim()) return "";
+
+  // 把純空白行標記起來（避免被加上 @#%）
+  text = text.replace(/^[ \t]*$/gm, "@EMPTYLINE@");
+
   text = text.replace(/(^|\n)/g, "$1@#%");
   text = text.replace(/(\n|$)/g, "@#%$1");
   text = text.replace(/@#%「([^」]+)」/g, "@#%「$1」@#%");
@@ -123,8 +127,13 @@ function transformText(text) {
   text = text.replace(/@#%@#%/g, "");
   text = text.replace(/@#%/g, "*");
   text = text.replace(/」\*(\n|$)/g, "」$1");
+
+  // 把空行還原
+  text = text.replace(/@EMPTYLINE@/g, "");
+
   return text;
 }
+
 
 function runTransform() {
   const input = inputArea.value;
