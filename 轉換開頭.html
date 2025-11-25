@@ -26,14 +26,17 @@
 <script>
 // 將文字區塊轉換
 function convertText(text) {
-    // 支援 \n 或 \r\n 換行，角色名字尾端 - 可有可無
-    const pattern = /=+[\r\n]+([\s\S]+?)[ \t]*-?[ \t]*[\r\n]+(\d{4})\.(\d{2})\.(\d{2})[^\r\n]*[\r\n]+=+/g;
+    // 支援 \n 或 \r\n 換行
+    const pattern = /=+[\r\n]+([\s\S]+?)[\r\n]+(\d{4})\.(\d{2})\.(\d{2})[^\r\n]*[\r\n]+=+/g;
     return text.replace(pattern, (match, role, y, m, d) => {
-        // 去掉角色名字尾端所有空白和 -
+        // 先 trim
+        role = role.trim();
+        // 再強制刪掉尾端的 " -" 或單純尾端 "-"
         role = role.replace(/[\s-]+$/, '');
         return `Date: ${y}-${m}-${d}\nCharacter: ${role}`;
     });
 }
+
 
 
 // 監控 inputText 有內容就自動轉換
