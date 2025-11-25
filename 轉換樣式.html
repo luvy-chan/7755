@@ -84,6 +84,41 @@ h1 { text-align: center; margin: 20px 0; }
   text-align: center;
 }
 
+.left {
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%; /* 加上高度，讓 flex 作用 */
+}
+
+.bottom-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  margin-top: auto; /* 推到底部 */
+}
+
+.bottom-actions button {
+  width: 150px;          /* 與上方按鈕一致 */
+  height: 50px;
+  border-radius: 12px;
+  background-color: #F3F3F3;
+  color: #303030;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+  transition: all 0.2s ease;
+}
+.bottom-actions button:hover {
+  background-color: #D6E0F3;
+  color: white;
+  transform: translateY(-2px);
+}
+
 /* 預覽區 */
 .right iframe {
   width: 500px;
