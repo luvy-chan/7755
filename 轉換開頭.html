@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>聊開頭轉換</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
+  textarea { width: 100%; height: 300px; margin-bottom: 10px; font-family: monospace; font-size: 14px; }
+  button { padding: 10px 20px; font-size: 14px; margin-right: 10px; cursor: pointer; }
+</style>
+</head>
+<body>
+<h2>開頭轉換</h2>
+<textarea id="inputText" placeholder="貼上原始文字..."></textarea>
+<button onclick="convertText()">轉換</button>
+<button onclick="copyResult()">複製結果</button>
+<textarea id="outputText" placeholder="轉換結果會出現在這裡..." readonly></textarea>
+
+<script>
+function convertText() {
+    const input = document.getElementById('inputText').value;
+    // 正則抓每個區塊
+    const pattern = /=+\n(.+?)\s*-\s*\n(\d{4})\.(\d{2})\.(\d{2}) .*?\n=+/gs;
+    const result = input.replace(pattern, (match, role, y, m, d) => {
+        return `Date: ${y}-${m}-${d}\nCharacter: ${role}`;
+    });
+    document.getElementById('outputText').value = result;
+}
+
+function copyResult() {
+    const output = document.getElementById('outputText');
+    navigator.clipboard.writeText(output.value)
+        .then(() => {
+            console.log('已複製到剪貼簿');
+        })
+        .catch(err => {
+            console.error('複製失敗', err);
+        });
+}
+</script>
+</body>
+</html>
