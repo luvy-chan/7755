@@ -132,10 +132,11 @@ h1 { text-align: center; margin: 20px 0; }
 
   /* 讓預覽 iframe 填滿螢幕寬度 */
   .right iframe {
-    width: 100vw;
+    width: calc(100vw - 10px);
+    margin: 0 5px; /* 保險用 */
     height: calc(100vh - 60px);
-    border-radius: 0;
-  }
+    border-radius: 10px;
+}
 
   /* 左側變成側邊欄 */
   .left {
@@ -150,6 +151,7 @@ h1 { text-align: center; margin: 20px 0; }
     box-shadow: 3px 0 8px rgba(0,0,0,0.25);
     transition: left 0.3s ease;
     padding-top: 70px;
+    padding-bottom: 120px;
   }
 
   /* 左欄展開 */
