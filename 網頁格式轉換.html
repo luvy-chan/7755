@@ -184,20 +184,22 @@ function updatePreview() {
 
 // 下載 HTML
 document.getElementById('downloadBtn').addEventListener('click', function(){
+  if (!originalContent) return; // 沒有上傳檔案就不下載，避免報錯
+
   let content = originalContent;
-  const rules = getDynamicRules(); // 如果有動態規則
+
+  // 使用上面已經存在的 rules
   rules.forEach(rule => {
     const fromRegex = new RegExp(rule.from.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gs');
     content = content.replace(fromRegex, rule.to);
   });
-
 
   const blob = new Blob([content], {type:'text/html;charset=utf-8'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
 
-  // 取原始檔名，加上 "_C"
+  // 套用檔名
   const originalName = document.getElementById('fileInput').files[0].name;
   const dotIndex = originalName.lastIndexOf('.');
   const nameWithoutExt = dotIndex >= 0 ? originalName.slice(0, dotIndex) : originalName;
