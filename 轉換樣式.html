@@ -376,6 +376,8 @@ function updateVars() {
   updatePreview();
 }
 
+const updateVarsDebounced = debounce(updateVars);
+  
 // color → text 同步
 ['1','2','3'].forEach(i => {
   document.getElementById(`var${i}_color`).addEventListener('input', e => {
@@ -404,8 +406,6 @@ function debounce(fn, delay = 150) {
     timer = setTimeout(() => fn.apply(this, args), delay);
   };
 }
-
-const updateVarsDebounced = debounce(updateVars);
 
 // 清空
 document.getElementById('clearBtn').addEventListener('click', () => {
