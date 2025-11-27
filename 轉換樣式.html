@@ -526,11 +526,15 @@ document.querySelectorAll('.range-toggle').forEach(toggle => {
   });
 });
 
-toggle.addEventListener('click', (e) => {
-  e.stopPropagation();
-  rangePanel.classList.toggle('active');
-});
+// 每個滑桿按鈕都能正常開合 =======
+document.querySelectorAll('.range-toggle').forEach(btn => {
+  const panel = btn.parentElement.querySelector('.range-panel');
 
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    panel.classList.toggle('active');
+  });
+  
 // 點在外面 → 自動收回
 document.addEventListener('click', () => {
   rangePanel.classList.remove('active');
