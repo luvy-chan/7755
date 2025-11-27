@@ -222,13 +222,14 @@ input[type="number"] {
   width: 200px;
 }
 
-/* 輸入框右邊留空，避免文字被按鈕蓋住 */
 .input-group input[type="text"],
 .input-group input[type="number"] {
-  padding-right: 45px;
+  width: 100%;
+  padding-right: 40px; /* 留空給右側按鈕 */
+  box-sizing: border-box;
 }
 
-/* 通用：右側圓形按鈕（顏色與 PX 都用這個） */
+.color-circle,
 .input-suffix-btn {
   position: absolute;
   right: 6px;
@@ -239,26 +240,12 @@ input[type="number"] {
   border-radius: 50%;
   border: none;
   cursor: pointer;
-  background: #eee;
   display: flex;
   justify-content: center;
   align-items: center;
   box-shadow: 0 0 4px rgba(0,0,0,0.2);
-}
-
-/* 顏色按鈕（圓形，但保留 color input 功能） */
-.color-circle {
-  -webkit-appearance: none;
-  border-radius: 50%;
-  padding: 0;
-  border: none;
-  width: 32px;
-  height: 32px;
-  position: absolute;
-  right: 6px;
-  top: 50%;
-  transform: translateY(-50%);
-  cursor: pointer;
+  background: #eee;
+  z-index: 2;
 }
 
 /* 讓 color input 沒有原本的外框 */
@@ -328,14 +315,14 @@ input[type="number"] {
 <label>角色對話色
   <div class="input-group">
     <input type="text" id="var2" placeholder="#FFFFFF">
-    <input type="color" id="var1_color" class="color-circle">
+    <input type="color" id="var2_color" class="color-circle">
   </div>
 </label>
 
 <label>玩家對話色
   <div class="input-group">
     <input type="text" id="var3" placeholder="#F9CEDC">
-    <input type="color" id="var1_color" class="color-circle">
+    <input type="color" id="var3_color" class="color-circle">
   </div>
 </label>
 
@@ -543,8 +530,13 @@ overlay.addEventListener('click', () => {
   overlay.style.display = 'none';
 });
 
-const toggle = document.querySelector('.range-toggle');
-const rangePanel = document.getElementById('rangePanel');
+document.querySelectorAll('.range-toggle').forEach(toggle => {
+  const rangePanel = toggle.nextElementSibling; // 取同一 input-group 內的浮動 panel
+  toggle.addEventListener('click', e => {
+    e.stopPropagation();
+    rangePanel.classList.toggle('active');
+  });
+});
 
 toggle.addEventListener('click', (e) => {
   e.stopPropagation();
