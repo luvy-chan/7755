@@ -396,6 +396,15 @@ document.getElementById('var4_range').addEventListener('input', e => {
   document.getElementById(id).addEventListener('input', updateVars);
 });
 
+// 延遲 150ms 後才更新
+function debounce(fn, delay = 150) {
+  let timer = null;
+  return function (...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
 // 清空
 document.getElementById('clearBtn').addEventListener('click', () => {
   userVars = { var1:'', var2:'', var3:'', var4:'' };
@@ -477,10 +486,12 @@ function updatePreview() {
   // 3️⃣ 等 iframe 渲染完後還原捲動位置
   iframe.onload = () => {
     try {
-      iframe.contentWindow.scrollTo(0, scrollTop);
+      const doc = iframe.contentWindow.document;
+      doc.documentElement.scrollTop = scrollTop;
+      doc.body.scrollTop = scrollTop;
     } catch (e) {}
   };
-}
+
 
 // 下載 HTML
 document.getElementById('downloadBtn').addEventListener('click', function(){
