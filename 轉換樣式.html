@@ -8,6 +8,16 @@
 body { font-family: Arial, sans-serif; background: #f0f0f0; margin: 0; padding: 0; }
 h1 { text-align: center; margin: 20px 0; }
 
+/* 移除數字輸入的上下箭頭 */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
 .wrapper {
   display: flex;
   justify-content: center;
@@ -232,6 +242,36 @@ h1 { text-align: center; margin: 20px 0; }
   height: 32px;
   cursor: pointer;
 }
+
+.range-wrapper {
+  position: relative;
+}
+
+.range-toggle {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background: #eee;
+  cursor: pointer;
+}
+
+.range-panel {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: #fff;
+  padding: 10px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  margin-top: 6px;
+  display: none;
+  z-index: 20;
+}
+
+.range-panel.active {
+  display: block;
+}
+
   
 </style>
 </head>
@@ -268,12 +308,16 @@ h1 { text-align: center; margin: 20px 0; }
 </label>
 
 <label>對話寬(px)
-  <div class="input-group">
+  <div class="input-group range-wrapper" style="position:relative;">
     <input type="number" id="var4" placeholder="280">
-    <input type="range" id="var4_range" min="280" max="400" step="10">
+    <button class="range-toggle">PX</button>
+
+    <!-- 浮動滑桿面板 -->
+    <div class="range-panel" id="rangePanel">
+      <input type="range" id="var4_range" min="280" max="400" step="10">
+    </div>
   </div>
 </label>
-
 
 
     <!-- 清空 & 還原按鈕 -->
@@ -466,6 +510,25 @@ overlay.addEventListener('click', () => {
   leftPanel.classList.remove('active');
   overlay.style.display = 'none';
 });
+
+const toggle = document.querySelector('.range-toggle');
+const rangePanel = document.getElementById('rangePanel');
+
+toggle.addEventListener('click', (e) => {
+  e.stopPropagation();
+  rangePanel.classList.toggle('active');
+});
+
+// 點在外面 → 自動收回
+document.addEventListener('click', () => {
+  rangePanel.classList.remove('active');
+});
+
+// 點在 panel 內不要收回
+rangePanel.addEventListener('click', (e) => {
+  e.stopPropagation();
+});
+
 
   
 </script>
