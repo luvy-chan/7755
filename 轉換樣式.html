@@ -461,8 +461,25 @@ function processContent(content, maxMessages = 20) {
 
 // 更新預覽
 function updatePreview() {
+  const iframe = document.getElementById('preview');
+
+  // 1️⃣ 取得目前捲動位置
+  let scrollTop = 0;
+  try {
+    scrollTop = iframe.contentWindow.document.documentElement.scrollTop ||
+                iframe.contentWindow.document.body.scrollTop;
+  } catch (e) {}
+
+  // 2️⃣ 更新內容
   const content = originalContent || '';
-  document.getElementById('preview').srcdoc = processContent(content);
+  iframe.srcdoc = processContent(content);
+
+  // 3️⃣ 等 iframe 渲染完後還原捲動位置
+  iframe.onload = () => {
+    try {
+      iframe.contentWindow.scrollTo(0, scrollTop);
+    } catch (e) {}
+  };
 }
 
 // 下載 HTML
