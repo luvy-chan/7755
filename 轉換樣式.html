@@ -215,46 +215,61 @@ input[type="number"] {
   z-index: 1500;
 }
 
-/* ===== 新增：輸入框+附屬色票/拉條 ===== */
-/* 讓 input-group 可以放右側按鈕在內部 */
+/* ===== 修正版：輸入框 + 附屬按鈕/色票 ===== */
+
 .input-group {
   position: relative;
   width: 200px;
 }
 
+/* 給右側留更精準的空間 */
 .input-group input[type="text"],
 .input-group input[type="number"] {
   width: 100%;
-  padding-right: 40px; /* 留空給右側按鈕 */
+  padding-right: 36px; /* 修正 */
   box-sizing: border-box;
+  height: 34px;
 }
 
-.color-circle,
-.input-suffix-btn {
+/* ＝＝＝＝＝＝ 小圓形色票（獨立於其他按鈕）＝＝＝＝＝＝ */
+.color-circle {
   position: absolute;
-  right: 6px;
+  right: 4px;
   top: 50%;
   transform: translateY(-50%);
-  width: 32px;
-  height: 32px;
+  width: 22px; 
+  height: 22px; 
   border-radius: 50%;
+  padding: 0;
   border: none;
   cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-shadow: 0 0 4px rgba(0,0,0,0.2);
-  background: #eee;
+  background: transparent;
+  box-shadow: 0 0 3px rgba(0,0,0,0.25);
   z-index: 2;
 }
 
-/* 讓 color input 沒有原本的外框 */
-.color-circle::-webkit-color-swatch-wrapper {
-  padding: 0;
+/* 移除預設色票邊框 */
+.color-circle::-webkit-color-swatch-wrapper { padding: 0; }
+.color-circle::-webkit-color-swatch { border: none; }
+
+/* ＝＝＝＝＝＝ 右側按鈕（PX、↔️ 等）＝＝＝＝＝＝ */
+.input-suffix-btn {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 26px;
+  padding: 0 6px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #eee;
+  cursor: pointer;
+  box-shadow: 0 0 3px rgba(0,0,0,0.25);
+  font-size: 12px;
+  z-index: 2;
 }
-.color-circle::-webkit-color-swatch {
-  border: none;
-}
+
+/* ＝＝＝＝＝＝ 範圍拉條與彈窗 ＝＝＝＝＝＝ */
 
 .input-group input[type="range"] {
   width: 80px;
