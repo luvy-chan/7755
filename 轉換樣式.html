@@ -204,6 +204,34 @@ h1 { text-align: center; margin: 20px 0; }
   background: rgba(0,0,0,0.45);
   z-index: 1500;
 }
+
+/* ===== 新增：輸入框+附屬色票/拉條 ===== */
+.input-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 200px;
+}
+
+.input-group input[type="text"],
+.input-group input[type="number"] {
+  flex: 1;
+}
+
+.input-group input[type="color"] {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.input-group input[type="range"] {
+  width: 80px;
+  height: 32px;
+  cursor: pointer;
+}
   
 </style>
 </head>
@@ -219,17 +247,33 @@ h1 { text-align: center; margin: 20px 0; }
 
     <!-- 變數輸入區 -->
 <label>網頁背景色
-  <input type="text" id="var1" placeholder="#FFF5F8">
+  <div class="input-group">
+    <input type="text" id="var1" placeholder="#FFF5F8">
+    <input type="color" id="var1_color">
+  </div>
 </label>
+
 <label>角色對話色
-  <input type="text" id="var2" placeholder="#FFFFFF">
+  <div class="input-group">
+    <input type="text" id="var2" placeholder="#FFFFFF">
+    <input type="color" id="var2_color">
+  </div>
 </label>
+
 <label>玩家對話色
-  <input type="text" id="var3" placeholder="#F9CEDC">
+  <div class="input-group">
+    <input type="text" id="var3" placeholder="#F9CEDC">
+    <input type="color" id="var3_color">
+  </div>
 </label>
+
 <label>對話寬(px)
-  <input type="text" id="var4" placeholder="280">
+  <div class="input-group">
+    <input type="number" id="var4" placeholder="280">
+    <input type="range" id="var4_range" min="280" max="400" step="10">
+  </div>
 </label>
+
 
 
     <!-- 清空 & 還原按鈕 -->
@@ -269,6 +313,22 @@ function renderVars() {
 }
 renderVars();
 
+// ===== 新增：同步右側 color/range 的初始值 =====
+function syncControlsFromVars() {
+  // 顏色三組
+  ['1','2','3'].forEach(i => {
+    const t = document.getElementById(`var${i}`).value;
+    if (t && /^#?[0-9A-Fa-f]{6}$/.test(t)) {
+      document.getElementById(`var${i}_color`).value =
+        t.startsWith('#') ? t : '#' + t;
+    }
+  });
+
+  // range
+  document.getElementById('var4_range').value = document.getElementById('var4').value || 280;
+}
+syncControlsFromVars();
+
 // 更新 userVars
 function updateVars() {
   userVars.var1 = document.getElementById('var1').value.trim();
@@ -278,6 +338,22 @@ function updateVars() {
   localStorage.setItem('userVars', JSON.stringify(userVars));
   updatePreview();
 }
+
+// ===== 新增：color → text 同步 =====
+['1','2','3'].forEach(i => {
+  document.getElementById(`var${i}_color`).addEventListener('input', e => {
+    const v = e.target.value.toUpperCase();
+    document.getElementById(`var${i}`).value = v;
+    updateVars();
+  });
+});
+
+// ===== 新增：range → number 同步 =====
+document.getElementById('var4_range').addEventListener('input', e => {
+  document.getElementById('var4').value = e.target.value;
+  updateVars();
+});
+
 
 // 即時監聽
 ['var1','var2','var3','var4'].forEach(id => {
@@ -290,6 +366,7 @@ document.getElementById('clearBtn').addEventListener('click', () => {
   renderVars();
   localStorage.removeItem('userVars');
   updatePreview();
+  syncControlsFromVars();
 });
 
 // 還原
@@ -298,6 +375,7 @@ document.getElementById('restoreBtn').addEventListener('click', () => {
   renderVars();
   localStorage.setItem('userVars', JSON.stringify(userVars));
   updatePreview();
+  syncControlsFromVars();
 });
 
 // 上傳檔案
