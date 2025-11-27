@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>網頁樣式轉換</title>
 <style>
@@ -30,8 +30,8 @@ input[type="number"] {
   display: flex;
   flex-direction: column;
   align-items: center;
-  position: relative; /* 讓底部按鈕絕對定位相對於這個容器 */
-  height: 720px;      /* 可依右側 iframe 高度設定 */
+  position: relative;
+  height: 720px;
 }
 
 /* 變數輸入區 */
@@ -41,13 +41,82 @@ input[type="number"] {
   align-items: center;
   margin-top: 15px;
   font-size: 14px;
+  width: 100%;
 }
-.left label input {
+
+/* 新樣式：輸入框包裝器 */
+.field-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
   width: 200px;
-  padding: 6px 8px;
+  margin-top: 5px;
+}
+
+.field-wrapper input[type="text"],
+.field-wrapper input[type="number"] {
+  width: 100%;
+  padding: 10px 48px 10px 12px; /* 預留右側空間給按鈕 */
+  box-sizing: border-box;
+  font-size: 16px;
   border-radius: 8px;
   border: 1px solid #ccc;
-  margin-top: 5px;
+}
+
+/* 顏色選擇器：內嵌在輸入框右側 */
+.color-button {
+  position: absolute;
+  right: 6px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%; /* 圓形 */
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+.color-button::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+.color-button::-webkit-color-swatch {
+  border: none;
+  border-radius: 50%;
+}
+
+/* PX按鈕：內嵌在輸入框右側 */
+.range-toggle {
+  position: absolute;
+  right: 6px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  background: #eee;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+/* 浮動 range 面板 */
+.range-panel {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: #fff;
+  padding: 10px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  margin-top: 6px;
+  display: none;
+  z-index: 20;
+}
+
+.range-panel.active {
+  display: block;
+}
+
+.range-panel input[type="range"] {
+  width: 150px;
+  cursor: pointer;
 }
 
 /* 清空 & 還原按鈕並排 */
@@ -55,7 +124,7 @@ input[type="number"] {
   display: flex;
   justify-content: center;
   gap: 10px;
-  margin-top: 10px;
+  margin-top: 20px;
 }
 .btn-group button {
   width: 120px;
@@ -76,8 +145,6 @@ input[type="number"] {
   transform: translateY(-2px);
 }
 
-
-
 /* 拖曳區 + 下載按鈕固定底部 */
 .bottom-actions {
   display: flex;
@@ -85,7 +152,7 @@ input[type="number"] {
   align-items: center;
   gap: 15px;
   position: absolute;
-  bottom: 20px; /* 距離容器底部 20px */
+  bottom: 20px;
 }
 
 #dropZone {
@@ -101,7 +168,7 @@ input[type="number"] {
 }
 
 .bottom-actions button {
-  width: 150px;          
+  width: 150px;
   height: 50px;
   border-radius: 12px;
   background-color: #F3F3F3;
@@ -119,7 +186,6 @@ input[type="number"] {
   transform: translateY(-2px);
 }
 
-
 /* 預覽區 */
 .right iframe {
   width: 500px;
@@ -131,11 +197,10 @@ input[type="number"] {
 
 .spacer { width: 20px; }
 
-/* === 手機版（真正手機裝置用） === */
+/* === 手機版 === */
 @media (max-width: 1024px) {
-
   .bottom-actions {
-    position: static !important; /* ⭐ 取消固定底部 */
+    position: static !important;
     margin-top: 20px;
     padding-bottom: 40px;
   }
@@ -146,37 +211,33 @@ input[type="number"] {
     gap: 0;
   }
 
-  /* 讓預覽 iframe 填滿螢幕寬度 */
   .right iframe {
     width: calc(100vw - 10px);
-    margin: 0 5px; /* 保險用 */
+    margin: 0 5px;
     height: calc(100vh - 60px);
     border-radius: 10px;
-}
+  }
 
-  /* 左側變成側邊欄 */
   .left {
     position: fixed;
     top: 0;
-    left: -280px; /* 初始隱藏 */
+    left: -280px;
     width: 260px;
     height: 100vh;
-    overflow-y: auto; /* 防止內容太高 */
+    overflow-y: auto;
     background: #fff;
     z-index: 2000;
     box-shadow: 3px 0 8px rgba(0,0,0,0.25);
     transition: left 0.3s ease;
-    padding-top: 70px;    
+    padding-top: 70px;
   }
 
-  /* 左欄展開 */
   .left.active {
     left: 0;
   }
 
   .spacer { display: none; }
 
-  /* 手機按鈕 */
   #menuToggle {
     display: block;
     position: fixed;
@@ -196,13 +257,11 @@ input[type="number"] {
   }
 }
 
-/* 桌面版：按鈕隱藏 */
 @media (min-width: 1025px) {
   #menuToggle {
     display: none;
   }
 }
-
 
 #overlay {
   display: none;
@@ -214,72 +273,6 @@ input[type="number"] {
   background: rgba(0,0,0,0.45);
   z-index: 1500;
 }
-
-/* === 強制修正：所有 input-group 內的右側元件精準置中 === */
-.input-group {
-  position: relative;
-  width: 200px;
-}
-
-/* 統一 input 高度（非常重要！） */
-.input-group input[type="text"],
-.input-group input[type="number"] {
-  width: 100%;
-  height: 36px;
-  padding: 6px 10px;
-  padding-right: 42px; /* 給右邊按鈕 / 色票留空間 */
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  box-sizing: border-box;
-  line-height: 36px;
-}
-
-/* === 小圓色票 === */
-.color-circle {
-  position: absolute;
-  right: 6px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  appearance: none;
-  background: transparent;
-  box-shadow: 0 0 3px rgba(0,0,0,0.25);
-  overflow: hidden; /* 讓色票變成真正的圓形 */
-}
-
-/* 消除色票預設邊框 */
-.color-circle::-webkit-color-swatch-wrapper { padding: 0; }
-.color-circle::-webkit-color-swatch {
-  border: none;
-  border-radius: 50%;
-}
-
-/* === 右側文字按鈕（例如 ↔️） === */
-.input-suffix-btn {
-  position: absolute;
-  right: 6px;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 26px;
-  padding: 0 6px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  background: #eee;
-  cursor: pointer;
-  box-shadow: 0 0 3px rgba(0,0,0,0.25);
-  font-size: 12px;
-}
-
-/* 滑桿面板與輸入框高度統一 */
-.range-wrapper input[type="number"] {
-  height: 36px !important;
-}
-  
 </style>
 </head>
 <body>
@@ -293,39 +286,36 @@ input[type="number"] {
   <div class="left">
 
     <!-- 變數輸入區 -->
-<label>網頁背景色
-  <div class="input-group">
-    <input type="text" id="var1" placeholder="#FFF5F8">
-    <input type="color" id="var1_color" class="color-circle">
-  </div>
-</label>
+    <label>網頁背景色
+      <div class="field-wrapper">
+        <input type="text" id="var1" placeholder="#FFF5F8">
+        <input type="color" id="var1_color" class="color-button">
+      </div>
+    </label>
 
-<label>角色對話色
-  <div class="input-group">
-    <input type="text" id="var2" placeholder="#FFFFFF">
-    <input type="color" id="var2_color" class="color-circle">
-  </div>
-</label>
+    <label>角色對話色
+      <div class="field-wrapper">
+        <input type="text" id="var2" placeholder="#FFFFFF">
+        <input type="color" id="var2_color" class="color-button">
+      </div>
+    </label>
 
-<label>玩家對話色
-  <div class="input-group">
-    <input type="text" id="var3" placeholder="#F9CEDC">
-    <input type="color" id="var3_color" class="color-circle">
-  </div>
-</label>
+    <label>玩家對話色
+      <div class="field-wrapper">
+        <input type="text" id="var3" placeholder="#F9CEDC">
+        <input type="color" id="var3_color" class="color-button">
+      </div>
+    </label>
 
-<label>對話寬(px)
-  <div class="input-group range-wrapper" style="position:relative;">
-    <input type="number" id="var4" placeholder="280">
-    <button class="range-toggle input-suffix-btn">↔️</button>
-
-    <!-- 浮動滑桿面板 -->
-    <div class="range-panel" id="rangePanel">
-      <input type="range" id="var4_range" min="280" max="400" step="10">
-    </div>
-  </div>
-</label>
-
+    <label>對話寬(px)
+      <div class="field-wrapper" style="position:relative;">
+        <input type="number" id="var4" placeholder="280">
+        <button class="range-toggle">PX</button>
+        <div class="range-panel" id="rangePanel">
+          <input type="range" id="var4_range" min="280" max="400" step="10">
+        </div>
+      </div>
+    </label>
 
     <!-- 清空 & 還原按鈕 -->
     <div class="btn-group">
@@ -336,7 +326,6 @@ input[type="number"] {
     <!-- 拖曳上傳 + 下載按鈕 -->
     <div class="bottom-actions">
       <div id="dropZone">拖曳檔案或點擊上傳<br>HTML檔</div>
-
       <button id="downloadBtn">下載(.HTML)</button>
     </div>
     <input type="file" id="fileInput" accept=".html" multiple style="display:none;">
@@ -352,8 +341,7 @@ input[type="number"] {
 let originalContent = '';
 const defaultVars = { var1:'#FFF5F8', var2:'#FFFFFF', var3:'#F9CEDC', var4:'280' };
 let userVars = JSON.parse(localStorage.getItem('userVars')) || {...defaultVars};
-let currentFile = null; // 儲存目前上傳的檔案，點擊或拖曳都用它
-
+let currentFile = null;
 
 // 渲染輸入框
 function renderVars() {
@@ -364,9 +352,8 @@ function renderVars() {
 }
 renderVars();
 
-// ===== 新增：同步右側 color/range 的初始值 =====
+// 同步右側 color/range 的初始值
 function syncControlsFromVars() {
-  // 顏色三組
   ['1','2','3'].forEach(i => {
     const t = document.getElementById(`var${i}`).value;
     if (t && /^#?[0-9A-Fa-f]{6}$/.test(t)) {
@@ -374,8 +361,6 @@ function syncControlsFromVars() {
         t.startsWith('#') ? t : '#' + t;
     }
   });
-
-  // range
   document.getElementById('var4_range').value = document.getElementById('var4').value || 280;
 }
 syncControlsFromVars();
@@ -390,7 +375,7 @@ function updateVars() {
   updatePreview();
 }
 
-// ===== 新增：color → text 同步 =====
+// color → text 同步
 ['1','2','3'].forEach(i => {
   document.getElementById(`var${i}_color`).addEventListener('input', e => {
     const v = e.target.value.toUpperCase();
@@ -399,12 +384,11 @@ function updateVars() {
   });
 });
 
-// ===== 新增：range → number 同步 =====
+// range → number 同步
 document.getElementById('var4_range').addEventListener('input', e => {
   document.getElementById('var4').value = e.target.value;
   updateVars();
 });
-
 
 // 即時監聽
 ['var1','var2','var3','var4'].forEach(id => {
@@ -433,7 +417,7 @@ document.getElementById('restoreBtn').addEventListener('click', () => {
 function handleFiles(files) {
   if(!files || files.length === 0) return;
   const file = files[0];
-  currentFile = file; // 儲存檔案
+  currentFile = file;
 
   const reader = new FileReader();
   reader.onload = e => {
@@ -462,10 +446,9 @@ function processContent(content, maxMessages = 20) {
   if(userVars.var4) result = result.replace(/\.msg-container\s*{[^}]*max-width\s*:\s*[^;]+px/gi,
     `.msg-container { display:flex;flex-direction:column;max-width:${userVars.var4}px`);
   
-  // 只保留前 maxMessages 條訊息（包含頭像）
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = result;
-  const messages = tempDiv.querySelectorAll('.char, .pc'); // 整個訊息容器
+  const messages = tempDiv.querySelectorAll('.char, .pc');
   messages.forEach((msg, index) => {
     if(index >= maxMessages){
       msg.remove();
@@ -478,19 +461,17 @@ function processContent(content, maxMessages = 20) {
 // 更新預覽
 function updatePreview() {
   const content = originalContent || '';
-  const MAX_PREVIEW = 20; // 想要顯示的最後 N 條訊息
   document.getElementById('preview').srcdoc = processContent(content);
 }
 
 // 下載 HTML
 document.getElementById('downloadBtn').addEventListener('click', function(){
-  const content = processContent(originalContent); // 保留原本變數替換功能
+  const content = processContent(originalContent);
   const blob = new Blob([content], {type:'text/html;charset=utf-8'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
 
-  // 取原始檔名，加上 "_C"
   const originalName = currentFile ? currentFile.name : 'processed.html';
   const dotIndex = originalName.lastIndexOf('.');
   const nameWithoutExt = dotIndex >= 0 ? originalName.slice(0, dotIndex) : originalName;
@@ -503,8 +484,6 @@ document.getElementById('downloadBtn').addEventListener('click', function(){
 // 手機版 左側滑出功能
 const menuBtn = document.getElementById('menuToggle');
 const leftPanel = document.querySelector('.left');
-
-// 點背景 → 關閉側欄
 const overlay = document.getElementById('overlay');
 
 menuBtn.addEventListener('click', () => {
@@ -512,41 +491,28 @@ menuBtn.addEventListener('click', () => {
   overlay.style.display = leftPanel.classList.contains('active') ? 'block' : 'none';
 });
 
-// 點遮罩關閉
 overlay.addEventListener('click', () => {
   leftPanel.classList.remove('active');
   overlay.style.display = 'none';
 });
 
-document.querySelectorAll('.range-toggle').forEach(toggle => {
-  const rangePanel = toggle.nextElementSibling; // 取同一 input-group 內的浮動 panel
-  toggle.addEventListener('click', e => {
-    e.stopPropagation();
-    rangePanel.classList.toggle('active');
-  });
+// PX 按鈕展開/收回 range
+const toggle = document.querySelector('.range-toggle');
+const rangePanel = document.getElementById('rangePanel');
+
+toggle.addEventListener('click', (e) => {
+  e.stopPropagation();
+  rangePanel.classList.toggle('active');
 });
 
-// 每個滑桿按鈕都能正常開合 =======
-document.querySelectorAll('.range-toggle').forEach(btn => {
-  const panel = btn.parentElement.querySelector('.range-panel');
-
-  btn.addEventListener('click', e => {
-    e.stopPropagation();
-    panel.classList.toggle('active');
-  });
-  
-// 點在外面 → 自動收回
 document.addEventListener('click', () => {
   rangePanel.classList.remove('active');
 });
 
-// 點在 panel 內不要收回
 rangePanel.addEventListener('click', (e) => {
   e.stopPropagation();
 });
-
-
-  
 </script>
+
 </body>
 </html>
