@@ -381,19 +381,19 @@ function updateVars() {
   document.getElementById(`var${i}_color`).addEventListener('input', e => {
     const v = e.target.value.toUpperCase();
     document.getElementById(`var${i}`).value = v;
-    updateVars();
+    updateVarsDebounced();
   });
 });
 
 // range → number 同步
 document.getElementById('var4_range').addEventListener('input', e => {
   document.getElementById('var4').value = e.target.value;
-  updateVars();
+  updateVarsDebounced();
 });
 
 // 即時監聽
 ['var1','var2','var3','var4'].forEach(id => {
-  document.getElementById(id).addEventListener('input', updateVars);
+  document.getElementById(id).addEventListener('input', updateVarsDebounced);
 });
 
 // 延遲 150ms 後才更新
@@ -404,6 +404,8 @@ function debounce(fn, delay = 150) {
     timer = setTimeout(() => fn.apply(this, args), delay);
   };
 }
+
+const updateVarsDebounced = debounce(updateVars);
 
 // 清空
 document.getElementById('clearBtn').addEventListener('click', () => {
