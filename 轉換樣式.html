@@ -216,25 +216,57 @@ input[type="number"] {
 }
 
 /* ===== 新增：輸入框+附屬色票/拉條 ===== */
+/* 讓 input-group 可以放右側按鈕在內部 */
 .input-group {
-  display: flex;
-  gap: 8px;
-  align-items: center;
+  position: relative;
   width: 200px;
 }
 
+/* 輸入框右邊留空，避免文字被按鈕蓋住 */
 .input-group input[type="text"],
 .input-group input[type="number"] {
-  flex: 1;
+  padding-right: 45px;
 }
 
-.input-group input[type="color"] {
-  width: 34px;
-  height: 34px;
-  padding: 0;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+/* 通用：右側圓形按鈕（顏色與 PX 都用這個） */
+.input-suffix-btn {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
   cursor: pointer;
+  background: #eee;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 0 4px rgba(0,0,0,0.2);
+}
+
+/* 顏色按鈕（圓形，但保留 color input 功能） */
+.color-circle {
+  -webkit-appearance: none;
+  border-radius: 50%;
+  padding: 0;
+  border: none;
+  width: 32px;
+  height: 32px;
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+/* 讓 color input 沒有原本的外框 */
+.color-circle::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+.color-circle::-webkit-color-swatch {
+  border: none;
 }
 
 .input-group input[type="range"] {
@@ -289,28 +321,28 @@ input[type="number"] {
 <label>網頁背景色
   <div class="input-group">
     <input type="text" id="var1" placeholder="#FFF5F8">
-    <input type="color" id="var1_color">
+    <input type="color" id="var1_color" class="color-circle">
   </div>
 </label>
 
 <label>角色對話色
   <div class="input-group">
     <input type="text" id="var2" placeholder="#FFFFFF">
-    <input type="color" id="var2_color">
+    <input type="color" id="var1_color" class="color-circle">
   </div>
 </label>
 
 <label>玩家對話色
   <div class="input-group">
     <input type="text" id="var3" placeholder="#F9CEDC">
-    <input type="color" id="var3_color">
+    <input type="color" id="var1_color" class="color-circle">
   </div>
 </label>
 
 <label>對話寬(px)
   <div class="input-group range-wrapper" style="position:relative;">
     <input type="number" id="var4" placeholder="280">
-    <button class="range-toggle">PX</button>
+    <button class="range-toggle input-suffix-btn">↔️</button>
 
     <!-- 浮動滑桿面板 -->
     <div class="range-panel" id="rangePanel">
