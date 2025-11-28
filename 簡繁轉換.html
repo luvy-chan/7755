@@ -91,10 +91,11 @@
                     '“': '「', '”': '」', '‘': '『', '’': '』'    // 新增：引號                    
                 };
 
-                result = result.replace(/[,.? !:;()\[\]{}<>\/\\|@#$%^&_+\-=~`“”‘’]/g, (match) => {
+                result = result.replace(/[,.? !:;()\[\]{}<\/\\|@#$%^&_+\-=~`“”‘’]/g, (match) => {
                     return punctMap[match] || match;
                 });
 
+                result = result.replace(/(\S)>/g, '$1》');
                 result = result.replace(/"/g, '”');
                 result = result.replace(/'/g, '’');
                 return result;
