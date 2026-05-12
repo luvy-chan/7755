@@ -83,11 +83,14 @@
                     '“': '「', '”': '」', '‘': '『', '’': '』'                  
                 };
 
-                result = result.replace(/[,?!:;\[\]{}\/|~`“”‘’]/g, (match) => {
+                //result = result.replace(/[,?!:;\[\]{}\/|~`“”‘’]/g, (match) => {
+                result = result.replace(/[,?!:;“”‘’]/g, (match) => {
                     return punctMap[match] || match;
                 });
                 
-                result = result.replace(/"/g, '」');
+                //result = result.replace(/"/g, '」');
+                let qTick = 0;
+                result = result.replace(/"/g, () => (qTick++ % 2 === 0 ? '「' : '」'));
                 result = result.replace(/'/g, '’');
                 
                 return result;
